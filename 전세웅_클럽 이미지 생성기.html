@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>클럽 이미지 자동 생성</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Noto Sans KR', sans-serif; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  input, textarea, button { font-family: 'Noto Sans KR', sans-serif; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect } = React;
+
+const FONT = "'Noto Sans KR', sans-serif";
+const PALETTES = [
+  { bg: "#5C4033", primary: "#3E2A20", light: "#F5F2F0" },
+  { bg: "#E8845C", primary: "#C86A42", light: "#FFF5F2" },
+  { bg: "#E89830", primary: "#CC7A10", light: "#FFF8F0" },
+  { bg: "#4A7C6F", primary: "#2E5E52", light: "#F0F7F5" },
+  { bg: "#6B5B95", primary: "#4A3D6E", light: "#F4F2F7" },
+  { bg: "#C94C4C", primary: "#A03030", light: "#FFF2F2" },
+  { bg: "#3B7DD8", primary: "#2A5CA0", light: "#F0F5FF" },
+  { bg: "#D4876A", primary: "#B06040", light: "#FFF5F0" },
+  { bg: "#2D6A4F", primary: "#1B4332", light: "#F0F7F2" },
+  { bg: "#7B2D8E", primary: "#5A1D6B", light: "#F7F0FA" },
+];
+const SHAPES = ["scallop", "clover", "arch", "diamond"];
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+/** EXCEL PARSER **/
+function cv(ws, a) { var c = ws[a]; return c && c.v != null ? String(c.v).trim() : ""; }
+function parseExcel(file) {
+  return new Promise(function(res, rej) {
+    var r = new FileReader();
+    r.onload = function(e) {
+      try {
+        var wb = XLSX.read(e.target.result, { type: "array" });
+        var ws = wb.Sheets[wb.SheetNames[0]];
+        var rng = XLSX.utils.decode_range(ws["!ref"] || "A1");
+        var mR = rng.e.r + 1;
+        var isF = false;
+        for (var i = 1; i <= Math.min(mR, 30); i++) { if (cv(ws, "B" + i).includes("클럽명")) { isF = true; break; } }
+        res(isF ? parseForm(ws, mR) : parseTable(ws));
+      } catch (er) { rej(er); }
+    };
+    r.onerror = rej;
+    r.readAsArrayBuffer(file);
+  });
+}
+function parseForm(ws, mR) {
+  var d = { newBenefitItems: [], monthlyBenefitItems: [] };
+  var fr = function(k) { for (var r = 1; r <= mR; r++) { if (cv(ws, "B" + r).includes(k) || cv(ws, "C" + r).includes(k)) return r; } return 0; };
+  var gm = function(s) { var l = []; for (var r = s; r <= mR; r++) { if (r > s && (cv(ws, "B" + r) || cv(ws, "C" + r))) break; var v = cv(ws, "D" + r); if (v) l.push(v); } return l.join("\n"); };
+  d.clubName = cv(ws, "D" + fr("클럽명")); d.clubIntro = cv(ws, "D" + fr("클럽소개"));
+  d.target = cv(ws, "D" + fr("가입대상")); d.condition = cv(ws, "D" + fr("가입조건"));
+  d.period = cv(ws, "D" + fr("기간")); d.inquiry = cv(ws, "D" + fr("문의사항"));
+  var nr = fr("기타안내"); if (nr) d.notice = gm(nr);
+  var br = fr("가입혜택");
+  if (br) {
+    var nR = 0, mmR = 0;
+    for (var r = br; r <= mR; r++) { var c2 = cv(ws, "C" + r); if (c2.includes("신규")) nR = r; if (c2.includes("월정기")) mmR = r; }
+    var pI = function(s, e) {
+      var it = [];
+      for (var r = s; r <= e; r++) { var dv = cv(ws, "D" + r), ev = cv(ws, "E" + r), gv = cv(ws, "G" + r); if (!dv || dv === "혜택명") continue; it.push({ title: dv, detail: ev || "", extra: gv || "" }); }
+      return it;
+    };
+    if (nR) d.newBenefitItems = pI(nR, mmR ? mmR - 1 : mR);
+    if (mmR) d.monthlyBenefitItems = pI(mmR, mR);
+  }
+  return d;
+}
+function parseTable(ws) {
+  var rows = XLSX.utils.sheet_to_json(ws, { header: 1 }); if (rows.length < 2) return {};
+  var h = rows[0], v = rows[1], raw = {};
+  (h || []).forEach(function(hh, i) { if (hh) raw[String(hh).trim()] = v[i] != null ? String(v[i]).trim() : ""; });
+  var f = function(ks) { for (var i = 0; i < ks.length; i++) { var ok = Object.keys(raw); for (var j = 0; j < ok.length; j++) { if (ok[j].replace(/\s/g, "").includes(ks[i].replace(/\s/g, ""))) return raw[ok[j]]; } } return ""; };
+  var nb = f(["신규혜택"]), mb = f(["월정기혜택"]);
+  var si = function(t) { if (!t) return []; return t.split(/\n\n+/).map(function(s) { var l = s.split("\n"); return { title: l[0] || "", detail: l.slice(1).join("\n"), extra: "" }; }); };
+  return { clubName: f(["클럽명"]), clubIntro: f(["클럽소개"]), target: f(["가입대상"]), condition: f(["가입조건"]), period: f(["기간"]), notice: f(["기타안내"]), inquiry: f(["문의사항"]), newBenefitItems: si(nb), monthlyBenefitItems: si(mb) };
+}
+
+/** CANVAS UTILS **/
+function rrect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y); c.closePath(); }
+function wrap(c, t, mw) { var o = []; String(t || "").split("\n").forEach(function(p) { if (!p.trim()) { o.push(""); return; } var l = ""; for (var i = 0; i < p.length; i++) { if (c.measureText(l + p[i]).width > mw && l) { o.push(l); l = p[i]; } else l += p[i]; } if (l) o.push(l); }); return o; }
+function loadImg(s) { return new Promise(function(r) { if (!s) { r(null); return; } var i = new Image(); i.crossOrigin = "anonymous"; i.onload = function() { r(i); }; i.onerror = function() { r(null); }; i.src = s; }); }
+function clipShape(c, sh, x, y, s) {
+  c.beginPath(); var cx = x + s / 2, cy = y + s / 2;
+  if (sh === "clover") { var r = s / 3.2; c.arc(cx, cy - r * .72, r, 0, Math.PI * 2); c.arc(cx + r * .72, cy, r, 0, Math.PI * 2); c.arc(cx, cy + r * .72, r, 0, Math.PI * 2); c.arc(cx - r * .72, cy, r, 0, Math.PI * 2); }
+  else if (sh === "arch") { var r2 = s / 2; c.moveTo(x, y + s); c.lineTo(x, y + r2); c.arc(cx, y + r2, r2, Math.PI, 0); c.lineTo(x + s, y + s); c.closePath(); }
+  else if (sh === "diamond") { var r3 = s * .46; c.moveTo(cx, cy - r3); c.quadraticCurveTo(cx + r3 * .62, cy - r3 * .62, cx + r3, cy); c.quadraticCurveTo(cx + r3 * .62, cy + r3 * .62, cx, cy + r3); c.quadraticCurveTo(cx - r3 * .62, cy + r3 * .62, cx - r3, cy); c.quadraticCurveTo(cx - r3 * .62, cy - r3 * .62, cx, cy - r3); c.closePath(); }
+  else { var bw = s / 3, br = bw / 2, bY = y + br + s * 0.06; c.moveTo(x, y + s); c.lineTo(x, bY); c.arc(x + bw * 0.5, bY, br, Math.PI, 0, false); c.arc(x + bw * 1.5, bY, br, Math.PI, 0, false); c.arc(x + bw * 2.5, bY, br, Math.PI, 0, false); c.lineTo(x + s, y + s); c.closePath(); }
+}
+function drawCover(c, img, x, y, w, h) { if (!img) return; var ir = img.width / img.height, tr = w / h, sw, sh, sx, sy; if (ir > tr) { sh = img.height; sw = sh * tr; sx = (img.width - sw) / 2; sy = 0; } else { sw = img.width; sh = sw / tr; sx = 0; sy = (img.height - sh) / 2; } c.drawImage(img, sx, sy, sw, sh, x, y, w, h); }
+function drawPersonIcon(c, x, y, s, col) { c.fillStyle = col + "18"; rrect(c, x, y, s, s, s * .22); c.fill(); var mx = x + s / 2, my = y + s / 2; c.fillStyle = col; c.beginPath(); c.arc(mx, my - s * .1, s * .11, 0, Math.PI * 2); c.fill(); c.beginPath(); c.arc(mx, my + s * .22, s * .19, Math.PI * 1.1, Math.PI * 1.9, true); c.fill(); }
+function drawClipIcon(c, x, y, s, col) { c.fillStyle = col + "18"; rrect(c, x, y, s, s, s * .22); c.fill(); var mx = x + s / 2, my = y + s / 2; c.strokeStyle = col; c.lineWidth = 2.5; rrect(c, mx - s * .18, my - s * .18, s * .36, s * .4, 3); c.stroke(); c.fillStyle = col; rrect(c, mx - s * .1, my - s * .24, s * .2, s * .09, 2); c.fill(); c.strokeStyle = col; c.lineWidth = 1.8; [-.04, .06, .16].forEach(function(d) { c.beginPath(); c.moveTo(mx - s * .1, my + s * d); c.lineTo(mx + s * .1, my + s * d); c.stroke(); }); }
+function drawCalIcon(c, x, y, s, col) { c.fillStyle = col + "18"; rrect(c, x, y, s, s, s * .22); c.fill(); var mx = x + s / 2, my = y + s / 2; c.strokeStyle = col; c.lineWidth = 2.5; rrect(c, mx - s * .22, my - s * .14, s * .44, s * .38, 3); c.stroke(); c.fillStyle = col; c.fillRect(mx - s * .22, my - s * .14, s * .44, s * .08); [-.08, .08].forEach(function(d) { c.fillStyle = col; rrect(c, mx + s * d - 2, my - s * .2, 4, s * .1, 1.5); c.fill(); }); [[0, .06], [-.1, .06], [.1, .06], [0, .17], [-.1, .17]].forEach(function(p) { c.beginPath(); c.arc(mx + s * p[0], my + s * p[1], 2, 0, Math.PI * 2); c.fill(); }); }
+
+/** GENERATE THUMBNAIL (750x750) **/
+function genThumb(data, pal, shape, imgSrc, label) {
+  var S = 750;
+  return loadImg(imgSrc).then(function(img) {
+    var cv = document.createElement("canvas"); cv.width = S; cv.height = S;
+    var c = cv.getContext("2d");
+    c.fillStyle = pal.bg; c.fillRect(0, 0, S, S);
+    c.fillStyle = "#fff"; c.font = "700 38px " + FONT; c.textAlign = "center";
+    c.fillText((label || data.clubName || "CLUB").toUpperCase(), S / 2, 94);
+    var ss = 413, sx = (S - ss) / 2, sy = 175;
+    c.save(); clipShape(c, shape, sx, sy, ss);
+    c.strokeStyle = "rgba(255,255,255,0.3)"; c.lineWidth = 6; c.stroke(); c.clip();
+    if (img) drawCover(c, img, sx, sy, ss, ss);
+    else { c.fillStyle = pal.primary; c.fillRect(sx, sy, ss, ss); }
+    c.restore();
+    return cv;
+  });
+}
+
+/** GENERATE DETAIL (카드 UI, W=670) **/
+function genDetail(data, pal) {
+  var W = 670, P = 34, CW = W - P * 2;
+  var cv = document.createElement("canvas"); cv.width = W; cv.height = 8000;
+  var c = cv.getContext("2d");
+  c.fillStyle = pal.light; c.fillRect(0, 0, W, 8000);
+  var y = 0;
+
+  function setShadow() { c.shadowColor = "rgba(0,0,0,0.06)"; c.shadowBlur = 16; c.shadowOffsetY = 6; }
+  function clearShadow() { c.shadowColor = "transparent"; c.shadowBlur = 0; c.shadowOffsetY = 0; }
+  function tC(t, fs, wt, col, mw, ty) { c.font = wt + " " + fs + "px " + FONT; c.fillStyle = col; c.textAlign = "center"; var ls = wrap(c, t, mw), lh = Math.round(fs * 1.35); for (var i = 0; i < ls.length; i++) { c.fillText(ls[i], W / 2, ty + fs * .78); ty += lh; } return ty; }
+  function tL(t, fs, wt, col, mw, ty, lx) { c.font = wt + " " + fs + "px " + FONT; c.fillStyle = col; c.textAlign = "left"; var ls = wrap(c, t, mw), lh = Math.round(fs * 1.35); for (var i = 0; i < ls.length; i++) { c.fillText(ls[i], lx, ty + fs * .78); ty += lh; } return ty; }
+  function mC(t, fs, wt, mw) { c.font = wt + " " + fs + "px " + FONT; return wrap(c, t, mw).length * Math.round(fs * 1.35); }
+  function tCG(t, fs, wt, mw, ty) { c.font = wt + " " + fs + "px " + FONT; var ls = wrap(c, t, mw - 34), lh = Math.round(fs * 1.35), bh = ls.length * lh + 12; c.fillStyle = "#f5f5f5"; rrect(c, P + 28, ty, CW - 56, bh, 8); c.fill(); c.fillStyle = "#666"; c.textAlign = "center"; var by = ty + 6; for (var i = 0; i < ls.length; i++) { c.fillText(ls[i], W / 2, by + fs * .78); by += lh; } return ty + bh; }
+  function mCG(t, fs, wt, mw) { c.font = wt + " " + fs + "px " + FONT; return wrap(c, t, mw - 34).length * Math.round(fs * 1.35) + 12; }
+
+  function drawIntroContent(startY) {
+    var iy = startY + 28;
+    c.fillStyle = pal.bg + "15"; rrect(c, (W - 80) / 2, iy, 80, 24, 12); c.fill();
+    c.fillStyle = pal.primary; c.font = "700 12px " + FONT; c.textAlign = "center"; c.fillText("What is?", W / 2, iy + 16);
+    iy += 38; iy = tC((data.clubName || "클럽명") + "은?", 30, "800", pal.primary, CW - 44, iy); iy += 10;
+    iy = tC(data.clubIntro || "", 15, "500", "#555", CW - 56, iy); iy += 24;
+    c.strokeStyle = "#f1f1f1"; c.lineWidth = 1; c.beginPath(); c.moveTo(P + 34, iy); c.lineTo(W - P - 34, iy); c.stroke(); iy += 18;
+    var iFn = [drawPersonIcon, drawClipIcon, drawCalIcon];
+    [{ l: "가입대상", v: data.target }, { l: "가입조건", v: data.condition }, { l: "클럽 혜택 기간", v: data.period }].forEach(function(it, idx) {
+      var rt = iy; iFn[idx](c, P + 28, rt, 40, pal.bg);
+      c.textAlign = "left"; c.fillStyle = "#999"; c.font = "700 12px " + FONT; c.fillText(it.l, P + 78, rt + 12 * .78 + 5);
+      var vb = tL(it.v || "-", 14, "600", "#333", CW - 124, rt + 24, P + 78);
+      iy = Math.max(rt + 40, vb) + 12;
+    });
+    return iy + 14;
+  }
+
+  y = 40;
+  var introEnd = drawIntroContent(y);
+  var introH = introEnd - y;
+  c.fillStyle = pal.light; c.fillRect(0, 0, W, introEnd + 24);
+  setShadow(); c.fillStyle = "#fff"; rrect(c, P, y, CW, introH, 16); c.fill(); clearShadow();
+  drawIntroContent(y);
+  y += introH + 28;
+
+  c.textAlign = "center"; c.fillStyle = pal.primary; c.font = "800 24px " + FONT; c.fillText("Club Benefit", W / 2, y + 24 * .78); y += 32;
+  c.fillStyle = "#777"; c.font = "500 13px " + FONT; c.fillText("클럽 가입 후, 다양한 혜택을 누려보세요", W / 2, y + 13 * .78); y += 28;
+
+  function drawSec(label, tag, items) {
+    var ic = items.length;
+    var h = 62; items.forEach(function(it, idx) { h += 28; h += mC(it.title, 18, "800", CW - 90); if (it.detail) { h += 6; h += mC(it.detail, 14, "400", CW - 90); } if (it.extra) { h += 9; h += mCG(it.extra, 13, "400", CW - 90); } h += 20; if (idx < ic - 1) h += 14; }); h += 12;
+    var ct = y;
+    setShadow(); c.fillStyle = "#fff"; rrect(c, P, ct, CW, h, 16); c.fill(); clearShadow();
+    var bTop = ct + 20;
+    c.font = "800 14px " + FONT; var lw = c.measureText(label).width + 28;
+    c.fillStyle = pal.bg + "15"; rrect(c, (W - lw) / 2, bTop, lw, 26, 13); c.fill();
+    c.fillStyle = pal.primary; c.textAlign = "center"; c.fillText(label, W / 2, bTop + 14 * .78 + 4);
+    var iy = bTop + 26 + 18;
+    items.forEach(function(it, idx) {
+      c.fillStyle = pal.bg; c.beginPath(); c.arc(W / 2, iy + 6, 9, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#fff"; c.font = "700 8px " + FONT; c.textAlign = "center"; c.fillText(String(idx + 1).padStart(2, "0"), W / 2, iy + 6 + 3); iy += 28;
+      iy = tC(it.title, 18, "800", "#222", CW - 90, iy);
+      if (it.detail) { iy += 6; iy = tC(it.detail, 14, "400", "#666", CW - 90, iy); }
+      if (it.extra) { iy += 9; iy = tCG(it.extra, 13, "400", CW - 90, iy); }
+      iy += 20;
+      if (idx < items.length - 1) { c.strokeStyle = "#f1f1f1"; c.lineWidth = 1; c.beginPath(); c.moveTo(P + 34, iy); c.lineTo(W - P - 34, iy); c.stroke(); iy += 14; }
+    });
+    y = ct + h + 18;
+  }
+  var bn = 1;
+  if (data.newBenefitItems && data.newBenefitItems.length > 0) { drawSec("클럽 신규 혜택", "BENEFIT " + String(bn).padStart(2, "0"), data.newBenefitItems); bn++; }
+  if (data.monthlyBenefitItems && data.monthlyBenefitItems.length > 0) { drawSec("클럽 월 정기 혜택", "BENEFIT " + String(bn).padStart(2, "0"), data.monthlyBenefitItems); }
+
+  y += 10;
+  if (data.notice || data.inquiry) {
+    var nTop = y, tY = y + 20;
+    if (data.notice) { tY += 26; c.font = "400 13px " + FONT; tY += wrap(c, data.notice, CW - 56).length * Math.round(13 * 1.35); tY += 16; }
+    if (data.inquiry) { tY += 26; c.font = "400 13px " + FONT; tY += wrap(c, data.inquiry, CW - 56).length * Math.round(13 * 1.35); tY += 14; }
+    tY += 14;
+    setShadow(); c.fillStyle = "#fff"; rrect(c, P, nTop, CW, tY - nTop, 16); c.fill(); clearShadow();
+    c.fillStyle = pal.bg + "40"; rrect(c, P, nTop, 4, tY - nTop, 2); c.fill();
+    y = nTop + 20;
+    if (data.notice) { c.textAlign = "left"; c.fillStyle = "#222"; c.font = "700 15px " + FONT; c.fillText("기타 안내", P + 24, y + 15 * .78); y += 26; y = tL(data.notice, 13, "500", "#777", CW - 56, y, P + 24); y += 16; }
+    if (data.inquiry) { if (data.notice) { c.strokeStyle = "#f1f1f1"; c.lineWidth = 1; c.beginPath(); c.moveTo(P + 24, y); c.lineTo(W - P - 24, y); c.stroke(); y += 14; } c.textAlign = "left"; c.fillStyle = "#222"; c.font = "700 15px " + FONT; c.fillText("문의사항", P + 24, y + 15 * .78); y += 26; y = tL(data.inquiry, 13, "500", "#777", CW - 56, y, P + 24); y += 12; }
+    y += 18;
+  }
+  y += 30;
+
+  var out = document.createElement("canvas"); out.width = W; out.height = y; out.getContext("2d").drawImage(cv, 0, 0); return out;
+}
+
+function dlCanvas(cv, n) { try { var u = cv.toDataURL("image/jpeg", 0.95); var a = document.createElement("a"); a.href = u; a.download = n; document.body.appendChild(a); a.click(); document.body.removeChild(a); } catch (e) { console.error(e); } }
+
+/** CANVAS PREVIEW COMPONENTS **/
+function ThumbPreview(props) {
+  var ref = useRef(null);
+  useEffect(function() {
+    if (!props.data || !props.pal) return;
+    genThumb(props.data, props.pal, props.shape, props.img, props.label).then(function(cv) {
+      if (ref.current) { ref.current.width = 750; ref.current.height = 750; ref.current.getContext("2d").drawImage(cv, 0, 0); }
+    });
+  }, [props.data, props.pal, props.shape, props.img, props.label]);
+  return <canvas ref={ref} width={750} height={750} style={{ width: 375, height: 375, borderRadius: 8 }} />;
+}
+
+function DetailPreview(props) {
+  var ref = useRef(null);
+  useEffect(function() {
+    if (!props.data || !props.pal) return;
+    var cv = genDetail(props.data, props.pal);
+    if (ref.current) { ref.current.width = cv.width; ref.current.height = cv.height; ref.current.getContext("2d").drawImage(cv, 0, 0); }
+  }, [props.data, props.pal]);
+  return <canvas ref={ref} style={{ width: "100%", maxWidth: 400, borderRadius: 8, display: "block" }} />;
+}
+
+/** UI COMPONENTS **/
+function InputField({ label, value, onChange, multi }) {
+  var base = { width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 13, fontFamily: FONT, boxSizing: "border-box" };
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <label style={{ fontSize: 12, fontWeight: 700, color: "#64748b", display: "block", marginBottom: 6 }}>{label}</label>
+      {multi ? <textarea value={value || ""} onChange={(e) => onChange(e.target.value)} rows={3} style={{ ...base, minHeight: 80, resize: "vertical" }} />
+        : <input type="text" value={value || ""} onChange={(e) => onChange(e.target.value)} style={base} />}
+    </div>
+  );
+}
+
+function BenefitItemEditor({ idx, item, color, onT, onD, onE, onRemove }) {
+  return (
+    <div style={{ background: "#f8fafc", borderRadius: 10, padding: 14, marginBottom: 10, border: "1px solid #e2e8f0" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        <div style={{ width: 24, height: 24, borderRadius: "50%", background: color, color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{String(idx + 1).padStart(2, "0")}</div>
+        <span style={{ fontSize: 12, fontWeight: 700, color: "#334155" }}>혜택 {idx + 1}</span>
+        <button onClick={onRemove} style={{ marginLeft: "auto", fontSize: 16, color: "#94a3b8", background: "none", border: "none", cursor: "pointer" }}>×</button>
+      </div>
+      <input type="text" value={item.title || ""} placeholder="혜택명" onChange={(e) => onT(e.target.value)}
+        style={{ width: "100%", padding: "8px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, fontWeight: 700, fontFamily: FONT, boxSizing: "border-box", marginBottom: 6 }} />
+      <textarea value={item.detail || ""} placeholder="세부내용" rows={2} onChange={(e) => onD(e.target.value)}
+        style={{ width: "100%", padding: "8px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 12, fontFamily: FONT, resize: "vertical", boxSizing: "border-box", marginBottom: 6 }} />
+      <div style={{ background: "#f1f5f9", borderRadius: 6, padding: "8px 10px" }}>
+        <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 600, marginBottom: 4 }}>추가 할인/혜택 (회색 박스로 표시)</div>
+        <input type="text" value={item.extra || ""} placeholder="예: 3% 금액할인권" onChange={(e) => onE(e.target.value)}
+          style={{ width: "100%", padding: "7px 10px", border: "1px solid #e2e8f0", borderRadius: 4, fontSize: 12, fontFamily: FONT, boxSizing: "border-box", background: "#fff" }} />
+      </div>
+    </div>
+  );
+}
+
+/** MAIN APP **/
+function App() {
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState(null);
+  const [pal, setPal] = useState(PALETTES[0]);
+  const [shape, setShape] = useState(SHAPES[0]);
+  const [tab, setTab] = useState("thumb");
+  const [thumbLabel, setThumbLabel] = useState("");
+  const [excelFile, setExcelFile] = useState(null);
+  const [thumbImage, setThumbImage] = useState(null);
+  const [imgName, setImgName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [rk, setRk] = useState(0);
+  function refresh() { setRk(v => v + 1); }
+
+  function handleImage(e) {
+    var f = e.target.files[0]; if (!f) return;
+    var ext = f.name.split(".").pop().toLowerCase();
+    if (!["jpg","jpeg","png","gif","webp","bmp","svg"].includes(ext)) {
+      alert("이미지 파일만 등록할 수 있습니다.\n지원 형식: JPG, PNG, GIF, WEBP");
+      e.target.value = ""; return;
+    }
+    setImgName(f.name);
+    var r = new FileReader(); r.onload = (ev) => setThumbImage(ev.target.result); r.readAsDataURL(f);
+  }
+
+  function handleExcel(e) {
+    var f = e.target.files[0]; if (!f) return;
+    var ext = f.name.split(".").pop().toLowerCase();
+    if (!["xlsx","xls","csv"].includes(ext)) {
+      alert("엑셀 파일만 등록할 수 있습니다.\n지원 형식: XLSX, XLS, CSV");
+      e.target.value = ""; return;
+    }
+    setExcelFile(f);
+  }
+
+  function generate() {
+    if (!excelFile || !thumbImage) return;
+    setLoading(true);
+    parseExcel(excelFile).then(function(raw) {
+      if (!raw.newBenefitItems) raw.newBenefitItems = [];
+      if (!raw.monthlyBenefitItems) raw.monthlyBenefitItems = [];
+      setData(raw);
+      if (!thumbLabel) setThumbLabel(raw.clubName || "CLUB");
+      setPal(pick(PALETTES)); setShape(pick(SHAPES));
+      setTimeout(() => { setLoading(false); setStep(2); }, 800);
+    }).catch((err) => { alert("오류: " + err); setLoading(false); });
+  }
+
+  function randomize() { setPal(pick(PALETTES)); setShape(pick(SHAPES)); }
+
+  function download() {
+    if (!data || !pal) return;
+    setBusy(true);
+    var fn = data.clubName || "클럽";
+    if (tab === "thumb") {
+      genThumb(data, pal, shape, thumbImage, thumbLabel).then((tc) => { dlCanvas(tc, fn + "_썸네일.jpg"); setBusy(false); }).catch(() => setBusy(false));
+    } else { dlCanvas(genDetail(data, pal), fn + "_상세내용.jpg"); setBusy(false); }
+  }
+
+  function upd(k, v) { setData(p => ({ ...p, [k]: v })); refresh(); }
+  function updBI(lk, i, f, v) { setData(p => { var a = [...(p[lk] || [])]; a[i] = { ...a[i], [f]: v }; return { ...p, [lk]: a }; }); refresh(); }
+  function addBI(lk) { setData(p => ({ ...p, [lk]: [...(p[lk] || []), { title: "", detail: "", extra: "" }] })); refresh(); }
+  function rmBI(lk, i) { setData(p => { var a = [...(p[lk] || [])]; a.splice(i, 1); return { ...p, [lk]: a }; }); refresh(); }
+
+  var fields = [["clubName", "클럽명", false], ["clubIntro", "클럽소개", true], ["target", "가입대상", true], ["condition", "가입조건", true], ["period", "기간", false], ["notice", "기타안내", true], ["inquiry", "문의사항", true]];
+  var upBox = (filled, color) => ({ position: "relative", padding: 28, borderRadius: 12, border: "2px dashed " + (filled ? color : "#cbd5e1"), background: filled ? color + "08" : "#f8fafc", textAlign: "center", cursor: "pointer", transition: "all .2s" });
+  var fInput = { position: "absolute", inset: 0, opacity: 0, cursor: "pointer" };
+  var tabBtn = (active) => ({ padding: "9px 22px", borderRadius: 8, border: "none", background: active ? "#fff" : "transparent", color: active ? "#1e293b" : "#64748b", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: active ? "0 2px 6px rgba(0,0,0,0.06)" : "none", fontFamily: FONT });
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f8fafc", fontFamily: FONT, color: "#1e293b" }}>
+      {/* HEADER */}
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 32px", background: "#1e293b", color: "#fff" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 20 }}>🎨</span>
+          <h1 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>클럽 이미지 자동 생성</h1>
+        </div>
+        {step === 2 && <button onClick={() => { setStep(1); setData(null); setThumbLabel(""); }}
+          style={{ background: "rgba(255,255,255,.1)", border: "1px solid rgba(255,255,255,.2)", color: "#fff", padding: "6px 18px", borderRadius: 20, cursor: "pointer", fontSize: 13 }}>새 작업 시작</button>}
+      </header>
+
+      {/* STEP 1 */}
+      {step === 1 && !loading && (
+        <main style={{ maxWidth: 580, margin: "50px auto", padding: "0 20px" }}>
+          <div style={{ background: "#fff", borderRadius: 16, padding: 32, boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
+            <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>콘텐츠 준비</h2>
+            <p style={{ color: "#64748b", marginBottom: 30, fontSize: 14 }}>제작할 클럽의 데이터와 이미지를 등록해 주세요.</p>
+            <div style={{ display: "grid", gap: 16, marginBottom: 28 }}>
+              <div style={upBox(!!excelFile, "#22c55e")}>
+                <input type="file" accept=".xlsx,.xls,.csv" onChange={handleExcel} style={fInput} />
+                <div style={{ fontSize: 15, fontWeight: 600 }}>{excelFile ? "✅ " + excelFile.name : "📊 클럽 운영 계획서"}</div>
+                {!excelFile && <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 6 }}>작성한 엑셀 양식 파일 등록 <span style={{ color: "#dc2626" }}>(암호화해제 필수)</span></div>}
+              </div>
+              <div style={upBox(!!thumbImage, "#3b82f6")}>
+                <input type="file" accept=".jpg,.jpeg,.png,.gif,.webp" onChange={handleImage} style={fInput} />
+                {thumbImage ? <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center" }}><img src={thumbImage} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} /><span style={{ fontWeight: 600 }}>✅ 이미지 선택 완료</span></div>
+                  : <div><div style={{ fontSize: 15, fontWeight: 600 }}>🖼️ 썸네일 이미지</div><div style={{ fontSize: 12, color: "#64748b", marginTop: 6 }}>클럽 썸네일에 노출할 메인 이미지 파일 등록</div></div>}
+              </div>
+            </div>
+            <button onClick={generate} disabled={!excelFile || !thumbImage}
+              style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", fontSize: 16, fontWeight: 700, cursor: (excelFile && thumbImage) ? "pointer" : "not-allowed", background: (excelFile && thumbImage) ? "#1e293b" : "#cbd5e1", color: "#fff", transition: "all .2s" }}>
+              디자인 생성하기
+            </button>
+          </div>
+        </main>
+      )}
+
+      {loading && <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: 80 }}>
+        <div style={{ width: 48, height: 48, border: "4px solid #e2e8f0", borderTop: "4px solid #1e293b", borderRadius: "50%", animation: "spin .7s linear infinite" }} />
+        <p style={{ color: "#64748b", fontSize: 15 }}>데이터를 분석하고 있습니다...</p>
+      </div>}
+
+      {/* STEP 2 */}
+      {step === 2 && data && pal && (
+        <main style={{ display: "flex", height: "calc(100vh - 56px)" }}>
+          <aside style={{ width: 360, background: "#fff", borderRight: "1px solid #e2e8f0", padding: 24, overflowY: "auto", flexShrink: 0 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0 }}>콘텐츠 편집</h3>
+              <button onClick={randomize} style={{ fontSize: 12, color: "#3b82f6", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>🎨 스타일 랜덤</button>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, padding: "10px 12px", background: "#f8fafc", borderRadius: 8 }}>
+              <div style={{ width: 24, height: 24, borderRadius: 6, background: pal.bg }} />
+              <span style={{ fontSize: 12, color: "#64748b" }}>{pal.bg}</span>
+              <span style={{ fontSize: 12, color: "#94a3b8", marginLeft: "auto" }}>{shape}</span>
+            </div>
+            <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: "1px solid #f1f5f9" }}>
+              <label style={{ fontSize: 12, fontWeight: 700, color: pal.bg, display: "block", marginBottom: 6 }}>🖼 썸네일 상단 텍스트</label>
+              <input type="text" value={thumbLabel} onChange={(e) => setThumbLabel(e.target.value)} placeholder="예: APARTMENT"
+                style={{ width: "100%", padding: "10px 12px", border: "2px solid " + pal.bg + "40", borderRadius: 8, fontSize: 14, fontWeight: 600, fontFamily: FONT, boxSizing: "border-box" }} />
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>기본 정보</div>
+            {fields.map(([k, l, m]) => (!data[k] && k !== "clubName") ? null : <InputField key={k} label={l} value={data[k]} onChange={(v) => upd(k, v)} multi={m} />)}
+
+            {[["newBenefitItems", "✨ 클럽 신규 혜택"], ["monthlyBenefitItems", "📅 클럽 월정기 혜택"]].map(([lk, title]) => (
+              <div key={lk} style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #f1f5f9" }}>
+                <div style={{ display: "flex", alignItems: "center", marginBottom: 10 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: pal.bg }}>{title}</span>
+                  <button onClick={() => addBI(lk)} style={{ marginLeft: "auto", fontSize: 12, padding: "4px 12px", borderRadius: 6, border: "1px solid " + pal.bg + "40", background: pal.bg + "08", color: pal.bg, cursor: "pointer", fontWeight: 600 }}>+ 추가</button>
+                </div>
+                {(data[lk] || []).map((it, i) => <BenefitItemEditor key={lk + i} idx={i} item={it} color={pal.bg}
+                  onT={(v) => updBI(lk, i, "title", v)} onD={(v) => updBI(lk, i, "detail", v)} onE={(v) => updBI(lk, i, "extra", v)} onRemove={() => rmBI(lk, i)} />)}
+                {(!data[lk] || data[lk].length === 0) && <div style={{ fontSize: 12, color: "#cbd5e1", padding: 8 }}>항목 없음</div>}
+              </div>
+            ))}
+          </aside>
+
+          <section style={{ flex: 1, padding: "32px 40px", display: "flex", flexDirection: "column", alignItems: "center", gap: 24, overflowY: "auto", background: "#f1f5f9" }}>
+            <div style={{ display: "flex", gap: 4, background: "#e2e8f0", padding: 4, borderRadius: 10 }}>
+              <button onClick={() => setTab("thumb")} style={tabBtn(tab === "thumb")}>🖼 썸네일</button>
+              <button onClick={() => setTab("detail")} style={tabBtn(tab === "detail")}>📄 상세페이지</button>
+            </div>
+            <div style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.12)", borderRadius: 12, overflow: "hidden", background: "#fff", maxHeight: tab === "detail" ? "65vh" : "auto", overflowY: tab === "detail" ? "auto" : "visible" }}>
+              {tab === "thumb" ? <ThumbPreview key={"t" + rk} data={data} pal={pal} shape={shape} img={thumbImage} label={thumbLabel} />
+                : <DetailPreview key={"d" + rk} data={data} pal={pal} />}
+            </div>
+            <button onClick={download} disabled={busy}
+              style={{ padding: "14px 40px", borderRadius: 30, border: "none", background: busy ? "#93c5fd" : "#2563eb", color: "#fff", fontSize: 16, fontWeight: 700, cursor: busy ? "wait" : "pointer", boxShadow: "0 4px 16px rgba(37,99,235,0.35)", transition: "all .2s" }}>
+              {busy ? "⏳ 저장 중..." : "📥 이미지 저장"}
+            </button>
+            <div style={{ fontSize: 12, color: "#94a3b8" }}>📁 {data.clubName || "클럽"}_{tab === "thumb" ? "썸네일" : "상세내용"}.jpg</div>
+          </section>
+        </main>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
