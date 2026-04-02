@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장교동 커피클럽 3월 활동</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #3182F6;
+    --blue-light: #EBF3FF;
+    --blue-mid: #C1D9FF;
+    --navy: #1B2B4B;
+    --gray-100: #F9FAFB;
+    --gray-200: #F2F4F6;
+    --gray-300: #E5E8EB;
+    --gray-500: #8B95A1;
+    --gray-700: #4E5968;
+    --gray-900: #191F28;
+    --teal: #00C9A7;
+    --pink: #F4516C;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', -apple-system, sans-serif;
+    background: #F5F7FA;
+    color: var(--gray-900);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  nav {
+    background: #fff;
+    border-bottom: 1px solid var(--gray-300);
+    padding: 0 40px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-logo-dot {
+    width: 28px;
+    height: 28px;
+    background: var(--blue);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-logo-dot svg {
+    width: 16px;
+    height: 16px;
+    fill: #fff;
+  }
+
+  .nav-logo-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.3px;
+  }
+
+  .nav-badge {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--blue);
+    background: var(--blue-light);
+    padding: 3px 10px;
+    border-radius: 99px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: #fff;
+    padding: 80px 40px 64px;
+    text-align: center;
+    border-bottom: 1px solid var(--gray-300);
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--blue);
+    background: var(--blue-light);
+    padding: 5px 14px;
+    border-radius: 99px;
+    margin-bottom: 24px;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--blue);
+  }
+
+  .hero h1 {
+    font-size: 52px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    color: var(--gray-900);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--blue);
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--gray-500);
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-top: 48px;
+  }
+
+  .hero-stat {
+    padding: 0 40px;
+    border-right: 1px solid var(--gray-300);
+  }
+
+  .hero-stat:last-child { border-right: none; }
+
+  .hero-stat-num {
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--gray-900);
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .hero-stat-num span {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--gray-500);
+    letter-spacing: 0;
+  }
+
+  .hero-stat-label {
+    font-size: 13px;
+    color: var(--gray-500);
+    font-weight: 400;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 40px 80px;
+  }
+
+  /* ── ABOUT SECTION ── */
+  .about-section {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    margin-bottom: 32px;
+    border: 1px solid var(--gray-300);
+  }
+
+  .section-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--gray-900);
+    margin-bottom: 10px;
+  }
+
+  .section-desc {
+    font-size: 15px;
+    color: var(--gray-500);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  .activity-photo {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .activity-photo img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    max-height: 340px;
+  }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .how-item {
+    background: var(--gray-100);
+    border-radius: var(--radius-md);
+    padding: 20px;
+  }
+
+  .how-item-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    margin-bottom: 12px;
+  }
+
+  .icon-blue { background: var(--blue-light); }
+  .icon-teal { background: #E0FBF5; }
+  .icon-pink { background: #FDEEF1; }
+
+  .how-item-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 5px;
+  }
+
+  .how-item-desc {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.6;
+  }
+
+  /* ── SESSIONS ── */
+  .sessions-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+    letter-spacing: 0.02em;
+  }
+
+  .sessions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .session-card {
+    background: #fff;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-lg);
+    padding: 28px 24px 24px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .session-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    transition: height 0.2s;
+  }
+
+  .card-blue::before  { background: var(--blue); }
+  .card-teal::before  { background: var(--teal); }
+  .card-pink::before  { background: var(--pink); }
+
+  .session-card:hover {
+    border-color: transparent;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+    transform: translateY(-4px);
+  }
+
+  .session-card:hover::before {
+    height: 6px;
+  }
+
+  .session-num {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    margin-top: 4px;
+  }
+
+  .num-blue { color: var(--blue); }
+  .num-teal { color: var(--teal); }
+  .num-pink { color: var(--pink); }
+
+  .session-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--gray-900);
+    line-height: 1.4;
+    margin-bottom: 12px;
+    min-height: 48px;
+  }
+
+  .session-divider {
+    height: 1px;
+    background: var(--gray-200);
+    margin-bottom: 16px;
+  }
+
+  .session-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .session-tag {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 99px;
+    color: var(--gray-500);
+    background: var(--gray-200);
+  }
+
+  .session-arrow {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--gray-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .session-card:hover .session-arrow {
+    background: var(--blue);
+    border-color: var(--blue);
+  }
+
+  .session-card:hover .session-arrow svg {
+    stroke: #fff;
+  }
+
+  .session-arrow svg {
+    width: 12px;
+    height: 12px;
+    stroke: var(--gray-500);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  /* ── BOTTOM CARDS ── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .info-card {
+    background: #fff;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+  }
+
+  .info-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 20px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 14px;
+  }
+
+  .info-row:last-child { border-bottom: none; }
+
+  .info-key {
+    color: var(--gray-500);
+    font-weight: 400;
+  }
+
+  .info-val {
+    color: var(--gray-900);
+    font-weight: 500;
+  }
+
+  .progress-card {
+    background: var(--navy);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    color: #fff;
+  }
+
+  .progress-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 24px;
+  }
+
+  .progress-item {
+    margin-bottom: 18px;
+  }
+
+  .progress-item:last-child { margin-bottom: 0; }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+
+  .progress-name { color: rgba(255,255,255,0.9); font-weight: 500; }
+  .progress-pct  { color: rgba(255,255,255,0.5); font-size: 12px; }
+
+  .progress-bar-bg {
+    height: 6px;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.1);
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s ease;
+  }
+
+  .fill-blue  { background: var(--blue); }
+  .fill-teal  { background: var(--teal); }
+  .fill-pink  { background: var(--pink); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #fff;
+    border-top: 1px solid var(--gray-300);
+    padding: 24px 40px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--gray-500);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 680px) {
+    .hero h1 { font-size: 32px; }
+    .hero-stats { flex-direction: column; gap: 20px; }
+    .hero-stat { border: none; padding: 0; }
+    .sessions-grid, .how-grid, .bottom-grid { grid-template-columns: 1fr; }
+    .container { padding: 32px 20px 60px; }
+    nav { padding: 0 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-dot">
+      <svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 13c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+    </div>
+    <span class="nav-logo-text">장교동 커피클럽</span>
+  </div>
+  <span class="nav-badge">DX팀 · 2025.03</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">월간 활동 보고</div>
+  <h1>☕ 장교동<br><em>커피클럽</em> 3월</h1>
+  <p class="hero-sub">바이브 코딩 트렌드 학습과 업무 적용 사례 발굴을 위한<br>DX팀 스터디 그룹의 3월 활동을 공유합니다</p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-num">3<span>회</span></div>
+      <div class="hero-stat-label">총 세션 수</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">3<span>월</span></div>
+      <div class="hero-stat-label">운영 기간</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">DX</div>
+      <div class="hero-stat-label">운영 팀</div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- ABOUT -->
+  <div class="about-section">
+    <p class="section-eyebrow">About</p>
+    <h2 class="section-title">커피클럽이란?</h2>
+    <p class="section-desc">바이브 코딩 관련 최신 트렌드와 활용 방법을 학습하고, 실제 업무에 적용 가능한 사례를 발굴하기 위한 스터디입니다. 매주 진행자를 지정하여 자유로운 형식으로 운영합니다.</p>
+    <div class="activity-photo">
+      <img src="장교동커피클럽_활동사진.jpeg" alt="장교동 커피클럽 활동 사진" />
+    </div>
+    <div class="how-grid">
+      <div class="how-item">
+        <div class="how-item-icon icon-blue">📌</div>
+        <div class="how-item-title">사례 시연</div>
+        <div class="how-item-desc">개인 또는 팀 단위 구현 사례 시연 및 공유</div>
+      </div>
+      <div class="how-item">
+        <div class="how-item-icon icon-teal">💬</div>
+        <div class="how-item-title">발표 & 토론</div>
+        <div class="how-item-desc">사전 과제 발표 및 업무 적용 가능성 토론</div>
+      </div>
+      <div class="how-item">
+        <div class="how-item-icon icon-pink">🛠</div>
+        <div class="how-item-title">프로토타입</div>
+        <div class="how-item-desc">업무 적용 아이디어 발굴 및 간단 프로토타입 테스트</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSIONS -->
+  <p class="sessions-label">3월 세션 활동</p>
+  <div class="sessions-grid">
+
+    <a class="session-card card-blue" href="session1.html">
+      <p class="session-num num-blue">SESSION 01</p>
+      <h3 class="session-title">개인별 프로젝트<br>자유 발표</h3>
+      <div class="session-divider"></div>
+      <div class="session-footer">
+        <span class="session-tag">자유 발표</span>
+        <div class="session-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 6h8M6 2l4 4-4 4"/></svg>
+        </div>
+      </div>
+    </a>
+
+    <a class="session-card card-teal" href="session2.html">
+      <p class="session-num num-teal">SESSION 02</p>
+      <h3 class="session-title">오픈클로<br>스터디</h3>
+      <div class="session-divider"></div>
+      <div class="session-footer">
+        <span class="session-tag">스터디</span>
+        <div class="session-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 6h8M6 2l4 4-4 4"/></svg>
+        </div>
+      </div>
+    </a>
+
+    <a class="session-card card-pink" href="session3.html">
+      <p class="session-num num-pink">SESSION 03</p>
+      <h3 class="session-title">AI로 내 업무<br>대체해보기</h3>
+      <div class="session-divider"></div>
+      <div class="session-footer">
+        <span class="session-tag">실습</span>
+        <div class="session-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 6h8M6 2l4 4-4 4"/></svg>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- BOTTOM INFO -->
+  <div class="bottom-grid">
+    <div class="info-card">
+      <p class="info-card-title">운영 정보</p>
+      <div class="info-row">
+        <span class="info-key">운영 팀</span>
+        <span class="info-val">DX팀</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">기간</span>
+        <span class="info-val">2025년 3월</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">총 세션</span>
+        <span class="info-val">3회</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">진행 방식</span>
+        <span class="info-val">매주 진행자 지정, 자유 형식</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">주제</span>
+        <span class="info-val">바이브 코딩 트렌드 & 업무 적용</span>
+      </div>
+    </div>
+
+    <div class="progress-card">
+      <p class="progress-card-title">세션 진행 현황</p>
+      <div class="progress-item">
+        <div class="progress-header">
+          <span class="progress-name">1회차 · 개인별 자유 발표</span>
+          <span class="progress-pct">완료</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill fill-blue" style="width: 100%;"></div>
+        </div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-header">
+          <span class="progress-name">2회차 · 오픈클로 스터디</span>
+          <span class="progress-pct">완료</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill fill-teal" style="width: 100%;"></div>
+        </div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-header">
+          <span class="progress-name">3회차 · AI로 업무 대체</span>
+          <span class="progress-pct">완료</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill fill-pink" style="width: 100%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  DX팀 · 장교동 커피클럽 · 2025년 3월 활동 보고
+</footer>
+
+</body>
+</html>

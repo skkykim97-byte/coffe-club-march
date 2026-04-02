@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1회차 · 개인별 프로젝트 자유 발표</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #3182F6;
+    --blue-light: #EBF3FF;
+    --navy: #1B2B4B;
+    --gray-100: #F9FAFB;
+    --gray-200: #F2F4F6;
+    --gray-300: #E5E8EB;
+    --gray-400: #CDD1D5;
+    --gray-500: #8B95A1;
+    --gray-700: #4E5968;
+    --gray-900: #191F28;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', -apple-system, sans-serif;
+    background: #F5F7FA;
+    color: var(--gray-900);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* NAV */
+  nav {
+    background: #fff;
+    border-bottom: 1px solid var(--gray-300);
+    padding: 0 40px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nav-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-700);
+    text-decoration: none;
+    padding: 6px 0;
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: color 0.15s;
+  }
+
+  .nav-back:hover { color: var(--blue); }
+
+  .nav-back svg {
+    width: 16px; height: 16px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .nav-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--gray-300);
+  }
+
+  .nav-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-900);
+  }
+
+  .nav-badge {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--blue);
+    background: var(--blue-light);
+    padding: 3px 10px;
+    border-radius: 99px;
+  }
+
+  /* HERO */
+  .hero {
+    background: #fff;
+    border-bottom: 1px solid var(--gray-300);
+    padding: 56px 40px 48px;
+  }
+
+  .hero-inner {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue);
+    background: var(--blue-light);
+    padding: 5px 14px;
+    border-radius: 99px;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-size: 40px;
+    font-weight: 900;
+    letter-spacing: -1.2px;
+    line-height: 1.15;
+    color: var(--gray-900);
+    margin-bottom: 12px;
+  }
+
+  .hero-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    color: var(--gray-500);
+  }
+
+  .meta-item svg {
+    width: 15px; height: 15px;
+    stroke: var(--gray-400);
+    stroke-width: 1.8;
+    fill: none;
+  }
+
+  .meta-dot {
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: var(--gray-400);
+  }
+
+  /* MEMBERS */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+  }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+  }
+
+  .members-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+  }
+
+  .member-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid var(--gray-300);
+    border-radius: 99px;
+    padding: 7px 16px 7px 7px;
+  }
+
+  .member-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .av-1 { background: #3182F6; }
+  .av-2 { background: #00C9A7; }
+  .av-3 { background: #F4516C; }
+  .av-4 { background: #F7931E; }
+  .av-5 { background: #7C5CFC; }
+
+  .member-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-900);
+  }
+
+  /* PROJECT CARDS */
+  .projects-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: var(--gray-900);
+    margin-bottom: 20px;
+  }
+
+  .project-card {
+    background: #fff;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 16px;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+
+  .project-card:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
+
+  .project-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .project-presenter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .presenter-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .presenter-info-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 2px;
+  }
+
+  .presenter-info-role {
+    font-size: 12px;
+    color: var(--gray-500);
+    font-weight: 400;
+  }
+
+  .project-type-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 99px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .badge-blue  { color: #185FA5; background: #EBF3FF; }
+  .badge-teal  { color: #0F6E56; background: #E0FBF5; }
+  .badge-pink  { color: #993556; background: #FDEEF4; }
+  .badge-amber { color: #854F0B; background: #FEF5E7; }
+
+  .project-divider {
+    height: 1px;
+    background: var(--gray-200);
+    margin-bottom: 20px;
+  }
+
+  .project-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--gray-900);
+    margin-bottom: 10px;
+  }
+
+  .project-desc {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  .project-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .tag {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--gray-100);
+    color: var(--gray-700);
+    border: 1px solid var(--gray-200);
+  }
+
+  .tag-tool {
+    background: var(--blue-light);
+    color: #185FA5;
+    border-color: #C1D9FF;
+  }
+
+  .project-insight {
+    background: var(--gray-100);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .insight-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--blue-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .insight-text {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.7;
+  }
+
+  .insight-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--blue);
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* SUMMARY */
+  .summary-card {
+    background: var(--navy);
+    border-radius: var(--radius-lg);
+    padding: 36px;
+    margin-top: 48px;
+    color: #fff;
+  }
+
+  .summary-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 12px;
+  }
+
+  .summary-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 24px;
+    letter-spacing: -0.3px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .summary-item {
+    background: rgba(255,255,255,0.07);
+    border-radius: var(--radius-md);
+    padding: 18px;
+  }
+
+  .summary-item-num {
+    font-size: 28px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.8px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .summary-item-num span {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .summary-item-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* RESULT MEDIA */
+  .result-area {
+    margin-top: 20px;
+  }
+
+  .result-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 10px;
+  }
+
+  .result-image-wrap {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--gray-300);
+    background: var(--gray-100);
+  }
+
+  .result-image-wrap img {
+    width: 100%;
+    display: block;
+    max-height: 360px;
+    object-fit: contain;
+    background: #fff;
+  }
+
+  .result-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gray-900);
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    transition: opacity 0.15s;
+  }
+
+  .result-link:hover { opacity: 0.8; }
+
+  .result-link svg {
+    width: 14px; height: 14px;
+    stroke: #fff;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  @media (max-width: 680px) {
+    nav { padding: 0 20px; }
+    .hero { padding: 40px 20px 36px; }
+    .hero h1 { font-size: 28px; }
+    .container { padding: 32px 20px 60px; }
+    .project-header { flex-direction: column; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <a class="nav-back" href="coffee_club_march.html">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      목록으로
+    </a>
+    <div class="nav-divider"></div>
+    <span class="nav-title">1회차 · 자유 발표</span>
+  </div>
+  <span class="nav-badge">SESSION 01</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">SESSION 01</div>
+    <h1>개인별 프로젝트<br>자유 발표</h1>
+    <div class="hero-meta-row">
+      <div class="meta-item">
+        <svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v3M11 1v3M2 7h12"/></svg>
+        2025년 3월 18일 (수)
+      </div>
+      <div class="meta-dot"></div>
+      <div class="meta-item">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2.5 1.5"/></svg>
+        오후 3시 30분
+      </div>
+      <div class="meta-dot"></div>
+      <div class="meta-item">
+        <svg viewBox="0 0 16 16"><path d="M13 12c0-2.8-2.2-5-5-5S3 9.2 3 12"/><circle cx="8" cy="5" r="2.5"/></svg>
+        참여자 5명
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="container">
+
+  <!-- 참여자 -->
+  <p class="section-label">참여자</p>
+  <div class="members-row">
+    <div class="member-chip">
+      <div class="member-avatar av-1">홍</div>
+      <span class="member-name">홍병우</span>
+    </div>
+    <div class="member-chip">
+      <div class="member-avatar av-2">전</div>
+      <span class="member-name">전세중</span>
+    </div>
+    <div class="member-chip">
+      <div class="member-avatar av-3">이</div>
+      <span class="member-name">이상현</span>
+    </div>
+    <div class="member-chip">
+      <div class="member-avatar av-4">전</div>
+      <span class="member-name">전세웅</span>
+    </div>
+    <div class="member-chip">
+      <div class="member-avatar av-5">김</div>
+      <span class="member-name">김하늘</span>
+    </div>
+  </div>
+
+  <!-- 프로젝트 -->
+  <p class="projects-title">발표 프로젝트</p>
+
+  <!-- 전세중 -->
+  <div class="project-card">
+    <div class="project-header">
+      <div class="project-presenter">
+        <div class="presenter-avatar av-2">전</div>
+        <div>
+          <div class="presenter-info-name">전세중</div>
+          <div class="presenter-info-role">토이 프로젝트</div>
+        </div>
+      </div>
+      <span class="project-type-badge badge-blue">Claude 활용</span>
+    </div>
+    <div class="project-divider"></div>
+    <h3 class="project-title">3D 이미지 카드 생성기</h3>
+    <p class="project-desc">이름과 나이를 입력하면 재미있는 3D 이미지 카드가 생성되는 토이 프로젝트입니다. 캐릭터 형태의 카드가 개인화된 이미지로 출력됩니다.</p>
+    <div class="project-tags">
+      <span class="tag tag-tool">Claude</span>
+      <span class="tag">3D 이미지</span>
+      <span class="tag">개인화 카드</span>
+      <span class="tag">토이 프로젝트</span>
+    </div>
+    <div class="project-insight">
+      <div class="insight-icon">💡</div>
+      <div>
+        <div class="insight-label">업무 적용 아이디어</div>
+        <div class="insight-text">만우절 등 이슈 이벤트 기획 시 개인화 콘텐츠 제작에 참고할 수 있는 아이디어 제시. 고객 참여형 이벤트 소재로 활용 가능.</div>
+      </div>
+    </div>
+    <div class="result-area">
+      <p class="result-label">결과물</p>
+      <div class="result-image-wrap">
+        <img src="전세중.png" alt="3D 이미지 카드 생성기 결과물" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 이상현 -->
+  <div class="project-card">
+    <div class="project-header">
+      <div class="project-presenter">
+        <div class="presenter-avatar av-3">이</div>
+        <div>
+          <div class="presenter-info-name">이상현</div>
+          <div class="presenter-info-role">점 MKT 참고 대시보드</div>
+        </div>
+      </div>
+      <span class="project-type-badge badge-teal">Google AI Studio 활용</span>
+    </div>
+    <div class="project-divider"></div>
+    <h3 class="project-title">경쟁사 쇼핑뉴스 & 날씨/요일 인사이트 대시보드</h3>
+    <p class="project-desc">경쟁사의 쇼핑 뉴스 동향과 날씨·요일 지수 인사이트를 한눈에 확인할 수 있는 마케팅 참고용 대시보드입니다.</p>
+    <div class="project-tags">
+      <span class="tag tag-tool">Google AI Studio</span>
+      <span class="tag">대시보드</span>
+      <span class="tag">경쟁사 모니터링</span>
+      <span class="tag">날씨 지수</span>
+    </div>
+    <div class="project-insight">
+      <div class="insight-icon">💡</div>
+      <div>
+        <div class="insight-label">업무 적용 아이디어</div>
+        <div class="insight-text">점포 마케팅 담당자가 경쟁사 동향과 외부 변수(날씨·요일)를 실시간으로 파악하여 프로모션 의사결정에 활용 가능.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 전세웅 -->
+  <div class="project-card">
+    <div class="project-header">
+      <div class="project-presenter">
+        <div class="presenter-avatar av-4">전</div>
+        <div>
+          <div class="presenter-info-name">전세웅</div>
+          <div class="presenter-info-role">클럽 상세 페이지 생성기</div>
+        </div>
+      </div>
+      <span class="project-type-badge badge-pink">Claude 활용</span>
+    </div>
+    <div class="project-divider"></div>
+    <h3 class="project-title">클럽 상세 페이지 자동 생성 서비스</h3>
+    <p class="project-desc">이미지와 클럽 운영 계획서를 첨부하면 DX팀이 제작하는 양식과 동일한 상세 페이지 이미지를 자동으로 생성해주는 서비스입니다.</p>
+    <div class="project-tags">
+      <span class="tag tag-tool">Claude</span>
+      <span class="tag">페이지 자동 생성</span>
+      <span class="tag">이미지 생성</span>
+      <span class="tag">리드타임 단축</span>
+    </div>
+    <div class="project-insight">
+      <div class="insight-icon">⚡</div>
+      <div>
+        <div class="insight-label">기대 효과</div>
+        <div class="insight-text">점포 제작 요청 시 기존 4~5일 소요되던 리드타임을 대폭 단축 가능. 반복 작업 자동화로 DX팀 업무 효율 개선 기대.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 김하늘 -->
+  <div class="project-card">
+    <div class="project-header">
+      <div class="project-presenter">
+        <div class="presenter-avatar av-5">김</div>
+        <div>
+          <div class="presenter-info-name">김하늘</div>
+          <div class="presenter-info-role">친절한 롯데 APP / 어드민 챗봇</div>
+        </div>
+      </div>
+      <span class="project-type-badge badge-amber">Claude + Gemini 연동</span>
+    </div>
+    <div class="project-divider"></div>
+    <h3 class="project-title">어드민 APP 안내 챗봇</h3>
+    <p class="project-desc">신규 입사자 및 직무 변경 인원을 위한 어드민 앱 사용 안내 챗봇입니다. 주요 Q&A 응대와 문의 데이터 적재를 자동화합니다.</p>
+    <div class="project-tags">
+      <span class="tag tag-tool">Claude API</span>
+      <span class="tag tag-tool">Gemini API</span>
+      <span class="tag">챗봇</span>
+      <span class="tag">온보딩</span>
+      <span class="tag">Q&A 자동화</span>
+    </div>
+    <div class="project-insight">
+      <div class="insight-icon">💡</div>
+      <div>
+        <div class="insight-label">업무 적용 아이디어</div>
+        <div class="insight-text">신규 입사자 온보딩 비용 절감 및 반복 문의 응대 자동화. 누적된 문의 데이터를 분석해 FAQ 고도화에 활용 가능.</div>
+      </div>
+    </div>
+    <div class="result-area">
+      <p class="result-label">결과물</p>
+      <a class="result-link" href="https://script.google.com/macros/s/AKfycbyjUeUVJDO_oXcihvPDfa20lcj1MnehLGT8-hT0Bohsnj5lB1Gme8sX6BLL-g0X-tWW/exec" target="_blank">
+        <svg viewBox="0 0 14 14"><path d="M8 2h4v4M6 8l6-6M3 4H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1v-1"/></svg>
+        시연 URL 바로가기
+      </a>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

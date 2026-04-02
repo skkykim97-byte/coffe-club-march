@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이름 궁합 — 획수로 보는 인연</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;900&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a0a00;
+    --paper: #f5efe4;
+    --red: #c0392b;
+    --red-light: #e74c3c;
+    --gold: #b8860b;
+    --gold-light: #d4a017;
+    --brush: #2c1810;
+    --muted: #8b7355;
+    --card: #fdf8f0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Paper texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(0,0,0,0.03) 30px),
+      repeating-linear-gradient(90deg, transparent, transparent 29px, rgba(0,0,0,0.015) 30px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Decorative corner elements */
+  .corner {
+    position: fixed;
+    width: 120px;
+    height: 120px;
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .corner svg { width: 100%; height: 100%; }
+  .corner-tl { top: 0; left: 0; }
+  .corner-tr { top: 0; right: 0; transform: scaleX(-1); }
+  .corner-bl { bottom: 0; left: 0; transform: scaleY(-1); }
+  .corner-br { bottom: 0; right: 0; transform: scale(-1); }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.8s ease;
+  }
+
+  .title-ko {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--brush);
+    line-height: 1.1;
+    position: relative;
+    display: inline-block;
+  }
+
+  .title-ko::after {
+    content: '';
+    display: block;
+    width: 60%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+    margin: 10px auto 0;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    margin-top: 10px;
+    font-weight: 300;
+  }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0;
+  }
+  .divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  .divider-icon { color: var(--gold); font-size: 1.1rem; }
+
+  /* Input Section */
+  .input-section {
+    background: var(--card);
+    border: 1px solid rgba(184,134,11,0.2);
+    border-radius: 4px;
+    padding: 36px 32px;
+    margin-bottom: 28px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+    animation: fadeUp 0.7s ease 0.2s both;
+    position: relative;
+  }
+
+  .input-section::before {
+    content: '연';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Noto Serif KR', serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: var(--red);
+    background: var(--paper);
+    padding: 0 12px;
+    opacity: 0.15;
+    letter-spacing: -0.05em;
+  }
+
+  .names-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: end;
+  }
+
+  .name-group { display: flex; flex-direction: column; gap: 8px; }
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1.5px solid rgba(184,134,11,0.3);
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-align: center;
+    letter-spacing: 0.1em;
+  }
+
+  input[type="text"]:focus {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+  }
+
+  input[type="text"]::placeholder { color: rgba(0,0,0,0.2); font-size: 1rem; }
+
+  .vs-symbol {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--gold);
+    text-align: center;
+    padding-bottom: 14px;
+    opacity: 0.7;
+  }
+
+  .btn {
+    display: block;
+    width: 100%;
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--brush);
+    color: var(--paper);
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn:hover { background: var(--red); }
+  .btn:active { transform: scale(0.99); }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
+  }
+
+  /* Result Section */
+  .result-section {
+    display: none;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .result-section.visible { display: block; }
+
+  /* Score card */
+  .score-card {
+    background: var(--card);
+    border: 1px solid rgba(184,134,11,0.2);
+    border-radius: 4px;
+    padding: 40px 32px;
+    text-align: center;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .score-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--red), var(--gold), var(--red));
+  }
+
+  .names-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .name-badge {
+    background: var(--paper);
+    border: 1.5px solid rgba(184,134,11,0.3);
+    border-radius: 3px;
+    padding: 10px 20px;
+  }
+
+  .name-badge .name-text {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--brush);
+    letter-spacing: 0.05em;
+  }
+
+  .name-badge .strokes-text {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
+
+  .heart-connector {
+    font-size: 1.8rem;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
+
+  /* Score display */
+  .score-container {
+    margin: 24px 0;
+    position: relative;
+  }
+
+  .score-number {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(4rem, 15vw, 7rem);
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--red) 0%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.04em;
+  }
+
+  .score-unit {
+    font-size: 1.2rem;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    margin-top: -4px;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: rgba(0,0,0,0.06);
+    border-radius: 2px;
+    height: 8px;
+    margin: 20px 0;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--red), var(--gold));
+    width: 0%;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .grade-text {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--red);
+    letter-spacing: 0.05em;
+    margin-top: 16px;
+  }
+
+  /* Detail breakdown */
+  .detail-card {
+    background: var(--card);
+    border: 1px solid rgba(184,134,11,0.2);
+    border-radius: 4px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+  }
+
+  .detail-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .detail-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(184,134,11,0.2);
+  }
+
+  .stroke-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+
+  .stroke-table th {
+    text-align: left;
+    font-weight: 700;
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .stroke-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+  }
+
+  .stroke-table tr:last-child td { border-bottom: none; }
+
+  .char-cell {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--brush);
+  }
+
+  .stroke-count {
+    font-weight: 700;
+    color: var(--red);
+    font-size: 1rem;
+  }
+
+  .total-row td {
+    border-top: 1.5px solid rgba(184,134,11,0.3);
+    font-weight: 700;
+    color: var(--gold);
+    padding-top: 14px;
+  }
+
+  /* Categories */
+  .categories {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .category-item {
+    background: var(--paper);
+    border: 1px solid rgba(184,134,11,0.2);
+    border-radius: 3px;
+    padding: 14px 16px;
+  }
+
+  .category-name {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .category-score-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .category-score {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--brush);
+    min-width: 40px;
+  }
+
+  .cat-bar-wrap {
+    flex: 1;
+    background: rgba(0,0,0,0.06);
+    border-radius: 2px;
+    height: 5px;
+    overflow: hidden;
+  }
+
+  .cat-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--red), var(--gold-light));
+    border-radius: 2px;
+    width: 0%;
+    transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Message */
+  .message-card {
+    background: linear-gradient(135deg, rgba(192,57,43,0.06) 0%, rgba(184,134,11,0.06) 100%);
+    border: 1px solid rgba(192,57,43,0.2);
+    border-radius: 4px;
+    padding: 28px 32px;
+    text-align: center;
+    position: relative;
+  }
+
+  .message-card::before {
+    content: '"';
+    position: absolute;
+    top: 12px;
+    left: 20px;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--red);
+    opacity: 0.15;
+  }
+
+  .compat-message {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: var(--brush);
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+  }
+
+  .compat-emoji {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  /* ── Pyramid ── */
+  .pyramid-card { overflow: visible; }
+
+  .pyramid-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 12px 0 8px;
+    position: relative;
+  }
+
+  /* vertical connector line behind pyramid */
+  .pyramid-wrap::before {
+    content: '';
+    position: absolute;
+    top: 12px; bottom: 48px;
+    left: 50%; transform: translateX(-50%);
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(184,134,11,0.15) 20%, rgba(184,134,11,0.15) 80%, transparent);
+    pointer-events: none;
+  }
+
+  .pyramid-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    position: relative;
+  }
+
+  /* connector arrows between rows */
+  .pyramid-row + .pyramid-row { margin-top: 0; }
+
+  .p-cell-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  /* downward arrow connector */
+  .p-arrow {
+    width: 1px;
+    height: 18px;
+    background: rgba(184,134,11,0.3);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .p-arrow::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid rgba(184,134,11,0.5);
+  }
+
+  .p-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: 1.5px solid transparent;
+    transition: transform 0.15s;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* Size variants by row depth */
+  .p-cell.size-0 { width: 58px; height: 58px; font-size: 1.3rem; }
+  .p-cell.size-1 { width: 52px; height: 52px; font-size: 1.1rem; }
+  .p-cell.size-2 { width: 46px; height: 46px; font-size: 0.95rem; }
+  .p-cell.size-3 { width: 40px; height: 40px; font-size: 0.85rem; }
+  .p-cell.size-4 { width: 36px; height: 36px; font-size: 0.78rem; }
+
+  /* Color themes per name */
+  .p-cell.name1 {
+    background: rgba(192,57,43,0.08);
+    border-color: rgba(192,57,43,0.35);
+  }
+  .p-cell.name2 {
+    background: rgba(184,134,11,0.1);
+    border-color: rgba(184,134,11,0.4);
+  }
+  .p-cell.sum {
+    background: rgba(44,24,16,0.06);
+    border-color: rgba(44,24,16,0.2);
+  }
+  .p-cell.final-cell {
+    background: linear-gradient(135deg, rgba(192,57,43,0.15), rgba(184,134,11,0.15));
+    border-color: var(--gold);
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(184,134,11,0.12), 0 4px 16px rgba(0,0,0,0.1);
+  }
+
+  .p-char {
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 900;
+    color: var(--brush);
+    line-height: 1;
+  }
+  .p-cell.name1 .p-char { color: var(--red); }
+  .p-cell.name2 .p-char { color: var(--gold); }
+  .p-cell.final-cell .p-char { color: var(--brush); font-size: 1.1em; }
+
+  .p-num {
+    font-size: 0.65em;
+    color: var(--muted);
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 1px;
+  }
+  .p-cell.sum .p-num { color: var(--brush); }
+  .p-cell.final-cell .p-num { color: var(--red); font-size: 0.75em; font-weight: 900; }
+
+  /* plus sign between cells in a row */
+  .p-plus {
+    font-size: 0.7rem;
+    color: rgba(0,0,0,0.2);
+    padding: 0 3px;
+    align-self: center;
+    flex-shrink: 0;
+    margin-bottom: 0;
+  }
+
+  /* diagonal lines — drawn via SVG overlay */
+  .pyramid-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .pyramid-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .legend-dot.n1 { background: rgba(192,57,43,0.4); }
+  .legend-dot.n2 { background: rgba(184,134,11,0.5); }
+  .legend-dot.sm { background: rgba(44,24,16,0.2); }
+
+  .pyramid-subtitle {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 16px;
+    letter-spacing: 0.06em;
+  }
+
+  /* final score banner */
+  .pyramid-final-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 22px auto 4px;
+    background: linear-gradient(135deg, rgba(192,57,43,0.12), rgba(184,134,11,0.14));
+    border: 2px solid var(--gold);
+    border-radius: 6px;
+    padding: 14px 28px;
+    max-width: 260px;
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  .pyramid-final-banner.revealed { opacity: 1; transform: scale(1); }
+
+  .pf-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .pf-score {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 2.6rem;
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--red), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+  }
+  .pf-unit {
+    font-size: 1rem;
+    color: var(--muted);
+    font-weight: 400;
+    align-self: flex-end;
+    padding-bottom: 4px;
+  }
+
+  /* final label (legacy) */
+  .pyramid-final-label {
+    font-size: 0.7rem;
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-align: center;
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  /* animation */
+  .p-cell { opacity: 0; transform: scale(0.7); }
+  .p-cell.revealed {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Footer note */
+  .footer-note {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-top: 40px;
+    opacity: 0.6;
+    line-height: 1.8;
+  }
+
+  @media (max-width: 480px) {
+    .names-row { grid-template-columns: 1fr; }
+    .vs-symbol { padding-bottom: 0; padding-top: 0; }
+    .categories { grid-template-columns: 1fr; }
+    .input-section { padding: 28px 20px; }
+    .score-card { padding: 28px 20px; }
+    .detail-card { padding: 24px 16px; }
+    .message-card { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Corner decorations -->
+<div class="corner corner-tl">
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0 L100 0 L100 10 L10 10 L10 100 L0 100 Z" fill="currentColor"/>
+    <path d="M20 20 L80 20 L80 26 L26 26 L26 80 L20 80 Z" fill="currentColor"/>
+    <circle cx="20" cy="20" r="4" fill="currentColor"/>
+  </svg>
+</div>
+<div class="corner corner-tr"><svg viewBox="0 0 100 100" fill="none"><path d="M0 0 L100 0 L100 100 L90 100 L90 10 L0 10 Z" fill="currentColor"/><path d="M20 20 L80 20 L80 80 L74 80 L74 26 L20 26 Z" fill="currentColor"/><circle cx="80" cy="20" r="4" fill="currentColor"/></svg></div>
+<div class="corner corner-bl"><svg viewBox="0 0 100 100" fill="none"><path d="M0 0 L10 0 L10 90 L100 90 L100 100 L0 100 Z" fill="currentColor"/><path d="M20 20 L26 20 L26 74 L80 74 L80 80 L20 80 Z" fill="currentColor"/><circle cx="20" cy="80" r="4" fill="currentColor"/></svg></div>
+<div class="corner corner-br"><svg viewBox="0 0 100 100" fill="none"><path d="M100 0 L100 100 L0 100 L0 90 L90 90 L90 0 Z" fill="currentColor"/><path d="M80 20 L80 80 L20 80 L20 74 L74 74 L74 20 Z" fill="currentColor"/><circle cx="80" cy="80" r="4" fill="currentColor"/></svg></div>
+
+<div class="container">
+
+  <header>
+    <div class="title-ko">이름 궁합</div>
+    <p class="subtitle">획수(획순)로 풀어보는 두 사람의 인연</p>
+  </header>
+
+  <section class="input-section">
+    <div class="names-row">
+      <div class="name-group">
+        <label>첫 번째 이름</label>
+        <input type="text" id="name1" placeholder="홍길동" maxlength="6">
+      </div>
+      <div class="vs-symbol">❤</div>
+      <div class="name-group">
+        <label>두 번째 이름</label>
+        <input type="text" id="name2" placeholder="성춘향" maxlength="6">
+      </div>
+    </div>
+    <button class="btn" onclick="calculate()">✦ 궁합 보기 ✦</button>
+  </section>
+
+  <section class="result-section" id="resultSection">
+    <div class="score-card">
+      <div class="names-display">
+        <div class="name-badge">
+          <div class="name-text" id="displayName1">—</div>
+          <div class="strokes-text" id="strokes1"></div>
+        </div>
+        <div class="heart-connector">🔴</div>
+        <div class="name-badge">
+          <div class="name-text" id="displayName2">—</div>
+          <div class="strokes-text" id="strokes2"></div>
+        </div>
+      </div>
+
+      <div class="score-container">
+        <div class="score-number" id="scoreNumber">0</div>
+        <div class="score-unit">점 / 100점</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="grade-text" id="gradeText"></div>
+    </div>
+
+    <!-- Pyramid UI -->
+    <div class="detail-card pyramid-card">
+      <div class="detail-title">획수 피라미드</div>
+      <div class="pyramid-wrap" id="pyramidWrap"></div>
+    </div>
+
+    <!-- Stroke breakdown -->
+    <div class="detail-card">
+      <div class="detail-title">획수 분석</div>
+      <table class="stroke-table">
+        <thead>
+          <tr>
+            <th>이름</th>
+            <th>글자</th>
+            <th>획수</th>
+          </tr>
+        </thead>
+        <tbody id="strokeTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Category breakdown -->
+    <div class="detail-card">
+      <div class="detail-title">궁합 세부 분석</div>
+      <div class="categories" id="categoriesGrid"></div>
+    </div>
+
+    <!-- Message -->
+    <div class="message-card">
+      <span class="compat-emoji" id="compatEmoji"></span>
+      <div class="compat-message" id="compatMessage"></div>
+    </div>
+  </section>
+
+  <p class="footer-note">
+    이름의 각 글자를 기준 획수 사전으로 계산합니다.<br>
+    재미로 보는 궁합이며, 실제 운명과 무관합니다.
+  </p>
+</div>
+
+<script>
+// ─── 한글 획수 사전 ───────────────────────────────────────────────────────────
+// 각 한글 음절의 자음+모음 획수 합계를 미리 정의
+// 초성(자음) 획수
+const CHOSEONG_STROKES = {
+  'ㄱ':2,'ㄲ':4,'ㄴ':2,'ㄷ':3,'ㄸ':6,'ㄹ':5,'ㅁ':4,'ㅂ':4,'ㅃ':8,'ㅅ':2,
+  'ㅆ':4,'ㅇ':1,'ㅈ':3,'ㅉ':6,'ㅊ':4,'ㅋ':3,'ㅌ':4,'ㅍ':4,'ㅎ':3
+};
+const CHOSEONG_LIST = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+// 중성(모음) 획수
+const JUNGSEONG_STROKES = {
+  'ㅏ':2,'ㅐ':3,'ㅑ':3,'ㅒ':4,'ㅓ':2,'ㅔ':3,'ㅕ':3,'ㅖ':4,'ㅗ':2,'ㅘ':4,
+  'ㅙ':5,'ㅚ':3,'ㅛ':3,'ㅜ':2,'ㅝ':4,'ㅞ':5,'ㅟ':3,'ㅠ':3,'ㅡ':1,'ㅢ':2,'ㅣ':1
+};
+const JUNGSEONG_LIST = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+
+// 종성(받침) 획수
+const JONGSEONG_STROKES = {
+  '':0,'ㄱ':2,'ㄲ':4,'ㄳ':5,'ㄴ':2,'ㄵ':5,'ㄶ':5,'ㄷ':3,'ㄹ':5,'ㄺ':7,'ㄻ':9,
+  'ㄼ':9,'ㄽ':7,'ㄾ':9,'ㄿ':8,'ㅀ':8,'ㅁ':4,'ㅂ':4,'ㅄ':6,'ㅅ':2,'ㅆ':4,
+  'ㅇ':1,'ㅈ':3,'ㅊ':4,'ㅋ':3,'ㅌ':4,'ㅍ':4,'ㅎ':3
+};
+const JONGSEONG_LIST = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+function getCharStroke(ch) {
+  const code = ch.charCodeAt(0);
+  // 한글 완성형 범위: 가(44032) ~ 힣(55203)
+  if (code >= 0xAC00 && code <= 0xD7A3) {
+    const offset = code - 0xAC00;
+    const jong = offset % 28;
+    const jung = Math.floor(offset / 28) % 21;
+    const cho = Math.floor(offset / 28 / 21);
+    const choseongKey = CHOSEONG_LIST[cho];
+    const jungseongKey = JUNGSEONG_LIST[jung];
+    const jongseongKey = JONGSEONG_LIST[jong];
+    return (CHOSEONG_STROKES[choseongKey] || 0) +
+           (JUNGSEONG_STROKES[jungseongKey] || 0) +
+           (JONGSEONG_STROKES[jongseongKey] || 0);
+  }
+  // 한자, 영어 등 — 기본 3획
+  return 3;
+}
+
+function getNameStrokes(name) {
+  return [...name].map(ch => ({ char: ch, strokes: getCharStroke(ch) }));
+}
+
+// ─── 궁합 점수 계산 ────────────────────────────────────────────────────────────
+function calcCompatibility(name1, name2) {
+  const s1 = getNameStrokes(name1);
+  const s2 = getNameStrokes(name2);
+  const total1 = s1.reduce((a, b) => a + b.strokes, 0);
+  const total2 = s2.reduce((a, b) => a + b.strokes, 0);
+
+  // 기본 궁합 알고리즘
+  // 1. 획수 합계 음양 조화 (홀/짝)
+  const yin1 = total1 % 2; // 0=양, 1=음
+  const yin2 = total2 % 2;
+  const yinyangScore = yin1 !== yin2 ? 25 : 14; // 음양 상이하면 조화
+
+  // 2. 획수 합의 끝자리 조합 (0~9 쌍)
+  const end1 = total1 % 10;
+  const end2 = total2 % 10;
+  const endPairScore = calcEndPairScore(end1, end2);
+
+  // 3. 이름 글자 수 조화
+  const lenScore = calcLengthScore(s1.length, s2.length);
+
+  // 4. 획수 차이 조화 (너무 차이나면 감점)
+  const diff = Math.abs(total1 - total2);
+  const diffScore = Math.max(0, 25 - diff * 1.2);
+
+  const raw = yinyangScore + endPairScore + lenScore + diffScore;
+  const final = Math.min(99, Math.max(10, Math.round(raw)));
+
+  return {
+    score: final,
+    total1, total2,
+    strokes1: s1, strokes2: s2,
+    categories: {
+      '음양 조화': { score: yinyangScore, max: 25 },
+      '수리 조화': { score: endPairScore, max: 30 },
+      '이름 균형': { score: lenScore, max: 20 },
+      '획수 조화': { score: Math.round(diffScore), max: 25 },
+    }
+  };
+}
+
+function calcEndPairScore(a, b) {
+  // 길흉 조합표 (0~9 쌍)
+  const lucky = [[1,6],[2,7],[3,8],[4,9],[0,5]];
+  const semiLucky = [[1,2],[3,4],[6,7],[8,9]];
+  const sum = (a + b) % 10;
+  // 합이 5 또는 0이면 대길
+  if (sum === 5 || sum === 0) return 30;
+  if (sum === 1 || sum === 6) return 25;
+  if (sum === 3 || sum === 8) return 22;
+  if (sum === 2 || sum === 7) return 18;
+  if (sum === 4 || sum === 9) return 14;
+  return 10;
+}
+
+function calcLengthScore(l1, l2) {
+  if (l1 === l2) return 20;
+  if (Math.abs(l1 - l2) === 1) return 16;
+  return 10;
+}
+
+// ─── 등급 및 메시지 ─────────────────────────────────────────────────────────
+function getGrade(score) {
+  // 피라미드 최종 2자리 점수 기준 (00~99)
+  if (score >= 90) return { grade: '천생연분 ✦', emoji: '🌹', msg: '하늘이 맺어준 인연입니다. 두 사람의 획수가 완벽한 조화를 이루어, 서로를 깊이 이해하고 오래도록 함께할 운명을 품고 있습니다.' };
+  if (score >= 80) return { grade: '대길 (大吉)', emoji: '🔥', msg: '매우 좋은 궁합입니다. 획수의 음양이 잘 맞고 수리의 흐름도 원활합니다. 함께할수록 서로에게 좋은 에너지를 불어넣어 주는 관계입니다.' };
+  if (score >= 70) return { grade: '길 (吉)', emoji: '💫', msg: '좋은 궁합입니다. 두 이름의 획수가 서로를 보완하는 구조를 이루고 있습니다. 노력과 이해로 더욱 깊은 인연을 만들어갈 수 있습니다.' };
+  if (score >= 60) return { grade: '평길 (平吉)', emoji: '🌿', msg: '나쁘지 않은 궁합입니다. 획수의 조화가 무난하며, 서로 배려하며 지내면 좋은 관계를 유지할 수 있습니다.' };
+  if (score >= 50) return { grade: '보통 (普通)', emoji: '🌙', msg: '보통의 궁합입니다. 획수 사이에 다소 긴장감이 있으나, 서로의 다름을 인정한다면 독특하고 깊은 관계로 발전할 수 있습니다.' };
+  if (score >= 40) return { grade: '주의 (注意)', emoji: '🌊', msg: '약간의 노력이 필요한 궁합입니다. 획수의 흐름이 다소 엇갈리는 면이 있어, 서로를 이해하려는 노력이 중요합니다.' };
+  if (score >= 30) return { grade: '노력 필요', emoji: '⚡', msg: '획수 상 도전적인 궁합입니다. 그러나 강한 인연일수록 만남이 쉽지 않다고 합니다. 진심 어린 노력이 운명을 바꿀 수 있습니다.' };
+  return { grade: '도전 (挑戰)', emoji: '🌑', msg: '획수의 흐름이 크게 엇갈립니다. 하지만 운명은 노력으로 만들어가는 것. 서로를 깊이 이해하려는 마음이 가장 중요합니다.' };
+}
+
+// ─── 피라미드 UI ──────────────────────────────────────────────────────────────
+/*
+  알고리즘:
+  1) 두 이름 글자를 번갈아 배치: name1[0], name2[0], name1[1], name2[1], ...
+     예) 전세중 + 송혜교 → 전,송,세,혜,중,교
+  2) 맨 위 행: 각 글자의 획수 그대로 표시
+  3) 아래 행부터: 인접한 두 수를 더해서 일의 자리(% 10)만 기재
+  4) 셀이 2개가 되면 멈추고, 그 두 숫자를 나란히 붙여 최종 2자리 점수
+     예) [1, 6] → 16점
+*/
+
+function buildPyramidData(name1, name2) {
+  const s1 = getNameStrokes(name1);
+  const s2 = getNameStrokes(name2);
+
+  // 번갈아 배치: name1[0], name2[0], name1[1], name2[1] ...
+  const topRow = [];
+  const maxLen = Math.max(s1.length, s2.length);
+  for (let i = 0; i < maxLen; i++) {
+    if (i < s1.length) topRow.push({ char: s1[i].char, val: s1[i].strokes, owner: 'name1' });
+    if (i < s2.length) topRow.push({ char: s2[i].char, val: s2[i].strokes, owner: 'name2' });
+  }
+
+  // 행 쌓기: 인접 두 수 합 % 10, 2칸이 되면 멈춤
+  const rows = [topRow];
+  let cur = topRow;
+  while (cur.length > 2) {
+    const next = [];
+    for (let i = 0; i < cur.length - 1; i++) {
+      const digit = (cur[i].val + cur[i + 1].val) % 10;
+      next.push({ char: String(digit), val: digit, owner: 'sum', rawSum: cur[i].val + cur[i + 1].val });
+    }
+    rows.push(next);
+    cur = next;
+  }
+  // 최종 2자리 점수
+  const finalScore = cur.length === 2 ? cur[0].val * 10 + cur[1].val : cur[0].val;
+  return { rows, finalScore };
+}
+
+function renderPyramid(name1, name2) {
+  const { rows, finalScore } = buildPyramidData(name1, name2);
+  const wrap = document.getElementById('pyramidWrap');
+  wrap.innerHTML = '';
+
+  // subtitle
+  const sub = document.createElement('div');
+  sub.className = 'pyramid-subtitle';
+  sub.textContent = '인접한 두 획수를 더해 일의 자리만 내려갑니다 → 마지막 두 자리가 점수';
+  wrap.appendChild(sub);
+
+  const totalRows = rows.length;
+
+  rows.forEach((row, rowIdx) => {
+    const isTop = rowIdx === 0;
+    const isBottom = rowIdx === totalRows - 1;
+    const sizeIdx = Math.min(4, rowIdx);
+
+    const rowEl = document.createElement('div');
+    rowEl.className = 'pyramid-row';
+
+    row.forEach((cell, cellIdx) => {
+      if (cellIdx > 0) {
+        const plus = document.createElement('div');
+        plus.className = 'p-plus';
+        plus.textContent = '+';
+        rowEl.appendChild(plus);
+      }
+
+      const cellWrap = document.createElement('div');
+      cellWrap.className = 'p-cell-wrap';
+
+      const cellEl = document.createElement('div');
+      let cls = `p-cell size-${sizeIdx} ${cell.owner}`;
+      if (isBottom) cls += ' final-cell';
+      cellEl.className = cls;
+
+      const charDiv = document.createElement('div');
+      charDiv.className = 'p-char';
+      charDiv.textContent = cell.char;
+
+      const numDiv = document.createElement('div');
+      numDiv.className = 'p-num';
+      if (isTop) {
+        numDiv.textContent = `${cell.val}획`;
+      } else if (isBottom) {
+        numDiv.textContent = `★`;
+      } else {
+        numDiv.textContent = cell.val;
+      }
+
+      cellEl.appendChild(charDiv);
+      cellEl.appendChild(numDiv);
+      cellWrap.appendChild(cellEl);
+      rowEl.appendChild(cellWrap);
+    });
+
+    wrap.appendChild(rowEl);
+
+    // 화살표 행 (마지막 제외)
+    if (!isBottom) {
+      const arrowRowEl = document.createElement('div');
+      arrowRowEl.className = 'pyramid-row';
+      const nextCount = rows[rowIdx + 1].length;
+      const nextSizeIdx = Math.min(4, rowIdx + 1);
+      const cellW = [58, 52, 46, 40, 36][nextSizeIdx];
+
+      for (let i = 0; i < nextCount; i++) {
+        if (i > 0) {
+          const sp = document.createElement('div');
+          sp.style.width = cellW + 'px';
+          arrowRowEl.appendChild(sp);
+        }
+        const arrowWrap = document.createElement('div');
+        arrowWrap.className = 'p-cell-wrap';
+        const arrow = document.createElement('div');
+        arrow.className = 'p-arrow';
+        arrowWrap.appendChild(arrow);
+        arrowRowEl.appendChild(arrowWrap);
+      }
+      wrap.appendChild(arrowRowEl);
+    }
+  });
+
+  // 최종 점수 배너
+  const finalBanner = document.createElement('div');
+  finalBanner.className = 'pyramid-final-banner';
+  finalBanner.innerHTML = `<span class="pf-label">궁합 점수</span><span class="pf-score">${finalScore}</span><span class="pf-unit">점</span>`;
+  wrap.appendChild(finalBanner);
+
+  // Legend
+  const legend = document.createElement('div');
+  legend.className = 'pyramid-legend';
+  legend.innerHTML = `
+    <div class="legend-item"><div class="legend-dot n1"></div>${name1}</div>
+    <div class="legend-item"><div class="legend-dot n2"></div>${name2}</div>
+    <div class="legend-item"><div class="legend-dot sm"></div>합산 (일의 자리)</div>`;
+  wrap.appendChild(legend);
+
+  // 애니메이션
+  const allCells = wrap.querySelectorAll('.p-cell');
+  allCells.forEach((cell, i) => {
+    setTimeout(() => cell.classList.add('revealed'), 80 + i * 55);
+  });
+  setTimeout(() => finalBanner.classList.add('revealed'), 80 + allCells.length * 55 + 100);
+}
+
+
+function calculate() {
+  const n1 = document.getElementById('name1').value.trim();
+  const n2 = document.getElementById('name2').value.trim();
+
+  if (!n1 || !n2) {
+    alert('두 이름을 모두 입력해주세요.');
+    return;
+  }
+  if (n1.length < 2 || n2.length < 2) {
+    alert('이름은 두 글자 이상 입력해주세요.');
+    return;
+  }
+
+  // Pyramid (먼저 계산해서 점수 추출)
+  const { rows: pyramidRows, finalScore: pyramidScore } = buildPyramidData(n1, n2);
+  renderPyramid(n1, n2);
+
+  // 피라미드 점수를 메인 점수로 사용
+  const result = calcCompatibility(n1, n2, pyramidScore);
+  const gradeInfo = getGrade(pyramidScore);
+
+  // Names display
+  document.getElementById('displayName1').textContent = n1;
+  document.getElementById('displayName2').textContent = n2;
+  document.getElementById('strokes1').textContent = `총 ${result.total1}획`;
+  document.getElementById('strokes2').textContent = `총 ${result.total2}획`;
+
+  // Score display
+  document.getElementById('scoreNumber').textContent = pyramidScore;
+  document.getElementById('gradeText').textContent = gradeInfo.grade;
+
+  // Message
+  document.getElementById('compatEmoji').textContent = gradeInfo.emoji;
+  document.getElementById('compatMessage').textContent = gradeInfo.msg;
+
+  // Stroke table
+  const tbody = document.getElementById('strokeTableBody');
+  tbody.innerHTML = '';
+  const addRows = (strokes, name, total) => {
+    strokes.forEach(({ char, strokes: s }) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td style="color:var(--muted);font-size:0.8rem">${name}</td><td class="char-cell">${char}</td><td class="stroke-count">${s}획</td>`;
+      tbody.appendChild(tr);
+    });
+    const tr = document.createElement('tr');
+    tr.className = 'total-row';
+    tr.innerHTML = `<td colspan="2" style="font-size:0.82rem;letter-spacing:0.05em">합계</td><td class="stroke-count" style="color:var(--gold)">${total}획</td>`;
+    tbody.appendChild(tr);
+    const sp = document.createElement('tr');
+    sp.innerHTML = `<td colspan="3" style="padding:6px"></td>`;
+    tbody.appendChild(sp);
+  };
+  addRows(result.strokes1, n1, result.total1);
+  addRows(result.strokes2, n2, result.total2);
+
+  // Categories
+  const grid = document.getElementById('categoriesGrid');
+  grid.innerHTML = '';
+  Object.entries(result.categories).forEach(([name, { score, max }]) => {
+    const pct = Math.round((score / max) * 100);
+    const div = document.createElement('div');
+    div.className = 'category-item';
+    div.innerHTML = `
+      <div class="category-name">${name}</div>
+      <div class="category-score-row">
+        <div class="category-score">${Math.round(score)}</div>
+        <div class="cat-bar-wrap"><div class="cat-bar" data-pct="${pct}"></div></div>
+      </div>`;
+    grid.appendChild(div);
+  });
+
+  // Show
+  const section = document.getElementById('resultSection');
+  section.classList.add('visible');
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Animate after render
+  setTimeout(() => {
+    document.getElementById('progressBar').style.width = pyramidScore + '%';
+    document.querySelectorAll('.cat-bar').forEach(bar => {
+      bar.style.width = bar.dataset.pct + '%';
+    });
+  }, 100);
+}
+
+// Enter key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') calculate();
+});
+</script>
+</body>
+</html>

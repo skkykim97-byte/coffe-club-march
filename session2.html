@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2회차 · 오픈클로 스터디</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #3182F6;
+    --blue-light: #EBF3FF;
+    --navy: #1B2B4B;
+    --teal: #00C9A7;
+    --teal-light: #E0FBF5;
+    --amber: #F7931E;
+    --amber-light: #FEF5E7;
+    --red: #F4516C;
+    --red-light: #FDEEF1;
+    --gray-100: #F9FAFB;
+    --gray-200: #F2F4F6;
+    --gray-300: #E5E8EB;
+    --gray-400: #CDD1D5;
+    --gray-500: #8B95A1;
+    --gray-700: #4E5968;
+    --gray-900: #191F28;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', -apple-system, sans-serif;
+    background: #F5F7FA;
+    color: var(--gray-900);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* NAV */
+  nav {
+    background: #fff;
+    border-bottom: 1px solid var(--gray-300);
+    padding: 0 40px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nav-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-700);
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: color 0.15s;
+  }
+
+  .nav-back:hover { color: var(--teal); }
+
+  .nav-back svg {
+    width: 16px; height: 16px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .nav-divider { width: 1px; height: 16px; background: var(--gray-300); }
+
+  .nav-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-900);
+  }
+
+  .nav-badge {
+    font-size: 11px;
+    font-weight: 500;
+    color: #0F6E56;
+    background: var(--teal-light);
+    padding: 3px 10px;
+    border-radius: 99px;
+  }
+
+  /* HERO */
+  .hero {
+    background: #fff;
+    border-bottom: 1px solid var(--gray-300);
+    padding: 56px 40px 48px;
+  }
+
+  .hero-inner {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0F6E56;
+    background: var(--teal-light);
+    padding: 5px 14px;
+    border-radius: 99px;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-size: 40px;
+    font-weight: 900;
+    letter-spacing: -1.2px;
+    line-height: 1.15;
+    color: var(--gray-900);
+    margin-bottom: 12px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--teal);
+  }
+
+  .hero-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    color: var(--gray-500);
+  }
+
+  .meta-item svg {
+    width: 15px; height: 15px;
+    stroke: var(--gray-400);
+    stroke-width: 1.8;
+    fill: none;
+  }
+
+  .meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--gray-400); }
+
+  /* CONTAINER */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+  }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+  }
+
+  /* MEMBERS */
+  .members-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+  }
+
+  .member-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid var(--gray-300);
+    border-radius: 99px;
+    padding: 7px 16px 7px 7px;
+  }
+
+  .member-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .av-1 { background: #3182F6; }
+  .av-2 { background: #00C9A7; }
+  .av-3 { background: #F4516C; }
+  .av-4 { background: #F7931E; }
+  .av-5 { background: #7C5CFC; }
+
+  .member-name { font-size: 13px; font-weight: 500; color: var(--gray-900); }
+
+  /* WHAT IS */
+  .what-card {
+    background: var(--navy);
+    border-radius: var(--radius-lg);
+    padding: 36px;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+
+  .what-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 12px;
+  }
+
+  .what-title {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .what-desc {
+    font-size: 15px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.8;
+    margin-bottom: 28px;
+  }
+
+  .what-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .what-feat {
+    background: rgba(255,255,255,0.07);
+    border-radius: var(--radius-md);
+    padding: 18px;
+  }
+
+  .feat-icon {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .feat-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .feat-desc {
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.6;
+  }
+
+  /* IMAGE CARD */
+  .image-card {
+    background: #fff;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .image-card-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .image-card-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--teal-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .image-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+
+  .image-card-sub {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  .image-card img {
+    width: 100%;
+    display: block;
+  }
+
+  /* USE CASES */
+  .cases-card {
+    background: #fff;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 16px;
+  }
+
+  .cases-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--gray-900);
+    margin-bottom: 20px;
+  }
+
+  .case-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .case-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .case-item:first-child { padding-top: 0; }
+
+  .case-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--teal-light);
+    color: #0F6E56;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .case-content {}
+
+  .case-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 5px;
+  }
+
+  .case-desc {
+    font-size: 13px;
+    color: var(--gray-500);
+    line-height: 1.7;
+  }
+
+  /* WARNING */
+  .warning-card {
+    background: #fff;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 16px;
+  }
+
+  .warning-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .warning-icon-wrap {
+    width: 40px; height: 40px;
+    background: var(--red-light);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .warning-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--gray-900);
+  }
+
+  .warning-sub {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  .warning-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .warning-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--red-light);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+
+  .warning-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+    flex-shrink: 0;
+  }
+
+  .warning-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #7A2030;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 680px) {
+    nav { padding: 0 20px; }
+    .hero { padding: 40px 20px 36px; }
+    .hero h1 { font-size: 28px; }
+    .container { padding: 32px 20px 60px; }
+    .what-features { grid-template-columns: 1fr; }
+    .project-header { flex-direction: column; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <a class="nav-back" href="coffee_club_march.html">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      목록으로
+    </a>
+    <div class="nav-divider"></div>
+    <span class="nav-title">2회차 · 오픈클로 스터디</span>
+  </div>
+  <span class="nav-badge">SESSION 02</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">SESSION 02</div>
+    <h1>오픈클로<br><em>OpenClaw</em> 스터디</h1>
+    <div class="hero-meta-row">
+      <div class="meta-item">
+        <svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v3M11 1v3M2 7h12"/></svg>
+        2025년 3월 25일 (월)
+      </div>
+      <div class="meta-dot"></div>
+      <div class="meta-item">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2.5 1.5"/></svg>
+        오전 9시
+      </div>
+      <div class="meta-dot"></div>
+      <div class="meta-item">
+        <svg viewBox="0 0 16 16"><path d="M13 12c0-2.8-2.2-5-5-5S3 9.2 3 12"/><circle cx="8" cy="5" r="2.5"/></svg>
+        참여자 5명
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="container">
+
+  <!-- 참여자 -->
+  <p class="section-label">참여자</p>
+  <div class="members-row">
+    <div class="member-chip">
+      <div class="member-avatar av-1">홍</div>
+      <span class="member-name">홍병우</span>
+    </div>
+    <div class="member-chip">
+      <div class="member-avatar av-2">전</div>
+      <span class="member-name">전세중</span>
+    </div>
+    <div class="member-chip">
+      <div class="member-avatar av-3">이</div>
+      <span class="member-name">이상현</span>
+    </div>
+    <div class="member-chip">
+      <div class="member-avatar av-4">전</div>
+      <span class="member-name">전세웅</span>
+    </div>
+    <div class="member-chip">
+      <div class="member-avatar av-5">김</div>
+      <span class="member-name">김하늘</span>
+    </div>
+  </div>
+
+  <!-- 오픈클로란? -->
+  <p class="section-label">오픈클로 스터디 내용</p>
+  <div class="what-card">
+    <p class="what-eyebrow">OpenClaw</p>
+    <h2 class="what-title">사용자를 대신해 디지털 업무를<br>수행하는 행동형 AI 에이전트</h2>
+    <p class="what-desc">기존 클라우드 기반 AI와 달리 사용자의 로컬 PC에서 직접 실행되어 파일 시스템 접근, 브라우저 제어, 외부 서비스 연동 등 실질적인 업무 자동화가 가능합니다.</p>
+    <div class="what-features">
+      <div class="what-feat">
+        <div class="feat-icon">🖥️</div>
+        <div class="feat-title">로컬 실행 & 컴퓨터 제어</div>
+        <div class="feat-desc">내 PC에 직접 설치되어 파일 읽기·쓰기·삭제 및 브라우저 제어 가능</div>
+      </div>
+      <div class="what-feat">
+        <div class="feat-icon">🧠</div>
+        <div class="feat-title">영구적인 기억 & 개인화</div>
+        <div class="feat-desc">대화 내용이 로컬 마크다운 파일로 저장되어 업무 스타일 학습</div>
+      </div>
+      <div class="what-feat">
+        <div class="feat-icon">⏰</div>
+        <div class="feat-title">24시간 자동화 비서</div>
+        <div class="feat-desc">저전력 PC 서버 활용, 텔레그램 등 외부 명령으로 원격 실행</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 스터디 자료 이미지 -->
+  <div class="image-card">
+    <div class="image-card-header">
+      <div class="image-card-icon">📊</div>
+      <div>
+        <div class="image-card-title">기존 AI vs 오픈클로 비교 분석</div>
+        <div class="image-card-sub">클라우드 기반 vs 로컬 기반의 차이 및 핵심 기능</div>
+      </div>
+    </div>
+    <img src="오픈클로.png" alt="오픈클로 스터디 자료 - 기존 AI 비교 및 핵심 기능" />
+  </div>
+
+  <!-- 실제 사용 사례 -->
+  <p class="section-label" style="margin-top: 36px;">사례 리서치</p>
+  <div class="cases-card">
+    <h3 class="cases-title">사례 리서치</h3>
+    <div class="case-item">
+      <div class="case-num">1</div>
+      <div class="case-content">
+        <div class="case-title">텔레그램을 통한 일정 등록</div>
+        <div class="case-desc">텔레그램 메시지로 명령을 전송하면 오픈클로가 로컬 PC에서 캘린더에 일정을 자동 등록하는 워크플로우를 실습하고 공유.</div>
+      </div>
+    </div>
+    <div class="case-item">
+      <div class="case-num">2</div>
+      <div class="case-content">
+        <div class="case-title">텔레그램을 통한 아마존 상품 구매 지시</div>
+        <div class="case-desc">텔레그램으로 구매 요청 메시지를 보내면 오픈클로가 브라우저를 직접 제어하여 아마존 상품 검색 및 구매 프로세스를 수행하는 시나리오 시연.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 주의 사항 -->
+  <p class="section-label">주의 사항</p>
+  <div class="warning-card">
+    <div class="warning-header">
+      <div class="warning-icon-wrap">⚠️</div>
+      <div>
+        <div class="warning-title">사용 시 주의할 영역</div>
+        <div class="warning-sub">아래 항목에 대한 오픈클로 활용은 지양하도록 합의</div>
+      </div>
+    </div>
+    <div class="warning-list">
+      <div class="warning-item">
+        <div class="warning-dot"></div>
+        <div class="warning-text">재무 문서 — 계약서, 예산안, 지출 결의 등 재무 관련 민감 문서</div>
+      </div>
+      <div class="warning-item">
+        <div class="warning-dot"></div>
+        <div class="warning-text">회사 내부 문서 — 사내 기밀, 미공개 전략, 인사 정보 등 내부 자료</div>
+      </div>
+      <div class="warning-item">
+        <div class="warning-dot"></div>
+        <div class="warning-text">자발적 의사결정 — AI가 사람의 확인 없이 독자적으로 결정·실행하는 민감한 커뮤니케이션</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
